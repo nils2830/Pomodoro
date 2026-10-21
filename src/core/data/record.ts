@@ -1,5 +1,5 @@
 /**
- * Every persisted, syncable thing in Cadence is a record.
+ * Every persisted, syncable thing in Steen is a record.
  * Soft deletes (deletedAt) let deletions travel through sync.
  */
 export interface BaseRecord {

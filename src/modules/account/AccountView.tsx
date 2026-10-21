@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowsClockwise, CloudCheck, CloudSlash, CreditCard, HardDrives, ShieldCheck, SignOut, Sparkle } from "@phosphor-icons/react";
+import { useSearchParams } from "next/navigation";
+import { ArrowsClockwise, CloudCheck, CloudSlash, CreditCard, HardDrives, ShieldCheck, SignOut, Sparkle, Trash } from "@phosphor-icons/react";
 import { Button } from "@/core/ui/Button";
 import { Switch } from "@/core/ui/Switch";
-import { toast, useUI } from "@/core/ui/store";
+import { confirmAction, toast, useUI } from "@/core/ui/store";
 import { config } from "@/core/config";
 import { useAuth } from "@/core/auth/store";
 import { signOut } from "@/core/auth/AuthProvider";
+import { wipeLocalData } from "@/core/auth/ownership";
 import { usePlan, useProSource } from "@/core/billing/entitlements";
 import { openBillingPortal } from "@/core/billing/checkout";
 import { usePrefs } from "@/core/prefs";
@@ -48,7 +49,6 @@ export function AccountView() {
   const setPrefs = usePrefs((s) => s.set);
   const sync = useSyncStatus();
   const openSettings = useUI((s) => s.openSettings);
-  const router = useRouter();
   const params = useSearchParams();
   const items = useEntries((s) => s.items);
   const focus = selectFocus(Object.values(items));
@@ -89,45 +89,32 @@ export function AccountView() {
           </Row>
         )}
 
-        {status === "signedOut" && (
-          <Row label="Sign in" hint="Keep your plan and sync your data across devices.">
-            <Button variant="primary" size="sm" onClick={() => router.push("/login?next=/account")}>
-              Sign in
-            </Button>
-          </Row>
-        )}
-
         {status === "signedIn" && (
           <>
+            <Row label="Signed in with" hint={providerLabel(user?.app_metadata?.provider)}>
+              <span className="text-[14px] text-ink-2">{user?.email}</span>
+            </Row>
             <Row
-              label="Cloud sync"
+              label="Saved to your account"
               hint={
-                plan !== "pro"
-                  ? "Sync is part of Pro."
-                  : sync.state === "error"
-                    ? `Last attempt failed: ${sync.error}`
-                    : sync.lastSyncedAt
-                      ? `Last synced ${new Date(sync.lastSyncedAt).toLocaleTimeString()}`
-                      : "Waiting for first sync…"
+                sync.state === "error"
+                  ? `Last attempt failed: ${sync.error}`
+                  : sync.lastSyncedAt
+                    ? `Last saved ${new Date(sync.lastSyncedAt).toLocaleTimeString()}`
+                    : "Saving for the first time…"
               }
             >
-              {plan === "pro" ? (
-                <>
-                  {sync.state === "error" ? <CloudSlash size={20} weight="bold" className="text-bad" /> : <CloudCheck size={20} weight="bold" />}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    icon={<ArrowsClockwise size={14} weight="bold" className={sync.state === "syncing" ? "animate-spin" : ""} />}
-                    onClick={sync.requestSync}
-                  >
-                    Sync now
-                  </Button>
-                </>
-              ) : (
-                <CloudSlash size={20} weight="bold" className="text-ink-3" />
-              )}
+              {sync.state === "error" ? <CloudSlash size={20} weight="bold" className="text-bad" /> : <CloudCheck size={20} weight="bold" />}
+              <Button
+                size="sm"
+                variant="outline"
+                icon={<ArrowsClockwise size={14} weight="bold" className={sync.state === "syncing" ? "animate-spin" : ""} />}
+                onClick={sync.requestSync}
+              >
+                Sync now
+              </Button>
             </Row>
-            <Row label="Sign out" hint="Your local data stays on this device.">
+            <Row label="Sign out" hint="Everything is saved to your account first, then cleared from this browser.">
               <Button size="sm" variant="outline" icon={<SignOut size={14} weight="bold" />} onClick={() => signOut()}>
                 Sign out
               </Button>
@@ -149,6 +136,12 @@ export function AccountView() {
           </Button>
         </Row>
 
+        {status === "signedIn" && (
+          <Row label="Delete account" hint="Ends any subscription and erases your sessions, tasks and settings for good.">
+            <DeleteAccountButton />
+          </Row>
+        )}
+
         {config.demoProAllowed && !config.billingEnabled && (
           <Row label="Demo Pro" hint="For development: unlocks Pro locally because billing isn't configured.">
             <Switch label="Demo Pro" checked={demoPro} onChange={(v) => setPrefs({ demoPro: v })} />
@@ -156,5 +149,43 @@ export function AccountView() {
         )}
       </div>
     </div>
+  );
+}
+
+function providerLabel(provider: unknown): string {
+  if (provider === "google") return "Google";
+  if (provider === "apple") return "Apple";
+  return "An email link";
+}
+
+function DeleteAccountButton() {
+  const [busy, setBusy] = useState(false);
+  const run = async () => {
+    const ok = await confirmAction({
+      title: "Delete your account?",
+      body: "Your subscription ends now, and every session, task and setting is erased from Steen. This can't be undone.",
+      confirmLabel: "Delete account",
+      tone: "danger",
+    });
+    if (!ok) return;
+    setBusy(true);
+    const res = await fetch("/api/account/delete", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ confirm: true }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      const body = (await res?.json().catch(() => ({}))) as { error?: string } | undefined;
+      setBusy(false);
+      toast({ message: body?.error ?? "Couldn't delete the account. Check your connection.", tone: "error" });
+      return;
+    }
+    wipeLocalData();
+    window.location.assign("/welcome");
+  };
+  return (
+    <Button size="sm" variant="outline" icon={<Trash size={14} weight="bold" />} onClick={run} disabled={busy}>
+      {busy ? "Deleting…" : "Delete"}
+    </Button>
   );
 }

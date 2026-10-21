@@ -9,14 +9,17 @@ import { useAppearance } from "./useAppearance";
 import { useModeColors } from "./useModeColors";
 import { ClientOnly } from "./ClientOnly";
 import { SiteFooter } from "./SiteFooter";
+import { FocusBackdrop } from "./FocusBackdrop";
 import { Toaster } from "../ui/Toaster";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { useUI } from "../ui/store";
 import { UpgradeDialog } from "../billing/UpgradeDialog";
 import { AuthProvider } from "../auth/AuthProvider";
+import { AuthGate } from "../auth/AuthGate";
 import { SyncProvider } from "../data/SyncProvider";
 import { useTimerEngine } from "@/modules/focus/engine/useTimerEngine";
 import { SettingsDialog } from "@/modules/focus/components/settings/SettingsDialog";
+import { WarmupOverlay } from "@/modules/focus/warmup/WarmupOverlay";
 import { cn } from "../lib/cn";
 import { isTypingTarget } from "../lib/dom";
 
@@ -53,8 +56,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ClientOnly>
         <Engines isFocus={isFocus} />
         <AuthProvider />
+        <AuthGate />
         <SyncProvider />
       </ClientOnly>
+      {isFocus && (
+        <ClientOnly>
+          <FocusBackdrop />
+        </ClientOnly>
+      )}
       {!zen && <TopBar />}
       <main className="relative z-[1] flex-1">{children}</main>
       {!zen && <SiteFooter className={cn("pb-24 md:pb-0", isFocus && "neutral bg-page")} />}
@@ -64,6 +73,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <UpgradeDialog />
         <ConfirmDialog />
         <ShortcutsDialog />
+        <WarmupOverlay />
         <Toaster />
       </ClientOnly>
     </div>

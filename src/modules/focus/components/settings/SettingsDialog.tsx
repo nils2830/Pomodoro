@@ -1,19 +1,24 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Bell, CheckSquare, Database, Palette, SpeakerHigh, Swatches, Timer, Monitor } from "@phosphor-icons/react";
+import { Bell, CheckSquare, Database, Eye, Palette, SpeakerHigh, Swatches, Timer, Monitor, UserCircle } from "@phosphor-icons/react";
 import { Dialog } from "@/core/ui/Dialog";
 import { useUI, type SettingsTab } from "@/core/ui/store";
 import { cn } from "@/core/lib/cn";
-import { TimerSection, TasksSection, SoundSection, DisplaySection, ThemeSection, NotificationsSection } from "./sections";
+import { TimerSection, TasksSection, SoundSection, DisplaySection, NotificationsSection } from "./sections";
+import { WarmupSection } from "./WarmupSection";
+import { AppearanceSection } from "./AppearanceSection";
+import { AccountSection } from "./AccountSection";
 import { ActivitiesSection } from "./ActivitiesSection";
 import { DataSection } from "./DataSection";
 
 const TABS: { id: SettingsTab; label: string; icon: ReactNode }[] = [
+  { id: "account", label: "Account", icon: <UserCircle size={18} weight="bold" /> },
   { id: "timer", label: "Timer", icon: <Timer size={18} weight="bold" /> },
+  { id: "warmup", label: "Warm-up", icon: <Eye size={18} weight="bold" /> },
+  { id: "appearance", label: "Appearance", icon: <Palette size={18} weight="bold" /> },
+  { id: "display", label: "Faces", icon: <Monitor size={18} weight="bold" /> },
   { id: "tasks", label: "Tasks", icon: <CheckSquare size={18} weight="bold" /> },
-  { id: "display", label: "Display", icon: <Monitor size={18} weight="bold" /> },
-  { id: "theme", label: "Theme", icon: <Palette size={18} weight="bold" /> },
   { id: "sound", label: "Sound", icon: <SpeakerHigh size={18} weight="bold" /> },
   { id: "notifications", label: "Alerts", icon: <Bell size={18} weight="bold" /> },
   { id: "activities", label: "Activities", icon: <Swatches size={18} weight="bold" /> },
@@ -21,11 +26,13 @@ const TABS: { id: SettingsTab; label: string; icon: ReactNode }[] = [
 ];
 
 const SECTIONS: Record<SettingsTab, () => ReactNode> = {
+  account: AccountSection,
   timer: TimerSection,
+  warmup: WarmupSection,
+  appearance: AppearanceSection,
+  display: DisplaySection,
   tasks: TasksSection,
   sound: SoundSection,
-  display: DisplaySection,
-  theme: ThemeSection,
   notifications: NotificationsSection,
   activities: ActivitiesSection,
   data: DataSection,

@@ -10,7 +10,6 @@ import { ProBadge } from "@/core/ui/ProBadge";
 import { useCan } from "@/core/billing/entitlements";
 import { useGate } from "@/core/billing/useGate";
 import { usePrefs } from "@/core/prefs";
-import { THEMES } from "@/core/theme/themes";
 import { notificationPermission, requestNotifications } from "@/core/lib/notify";
 import { cn } from "@/core/lib/cn";
 import { useFocusSettings } from "../../store/settings";
@@ -205,14 +204,9 @@ export function DisplaySection() {
   const setPrefs = usePrefs((p) => p.set);
   return (
     <>
-      <SectionTitle eyebrow="Display" title="How time looks">
-        Faces marked “no ticker” never count seconds. Hiding the timer also hides it from the tab title and progress bar.
+      <SectionTitle eyebrow="Faces" title="How time looks">
+        Faces marked “no ticker” never count seconds. To hide the timer completely, press H or use the eye button above it.
       </SectionTitle>
-      <Group>
-        <Field label="Hide the timer" hint="Shortcut: H. Hold the peek button to glance.">
-          <Switch label="Hide the timer" checked={s.hideTimer} onChange={(v) => set({ hideTimer: v })} />
-        </Field>
-      </Group>
       <Group title="Face">
         <div className="py-2">
           <FaceList />
@@ -254,70 +248,6 @@ export function DisplaySection() {
   );
 }
 
-export function ThemeSection() {
-  const [s, set] = useSettings();
-  const appearance = usePrefs((p) => p.doc.appearance);
-  const setPrefs = usePrefs((p) => p.set);
-  const canThemes = useCan("themes.all");
-  const gate = useGate();
-  return (
-    <>
-      <SectionTitle eyebrow="Theme" title="Colour">
-        The timer page takes the colours of the theme and shifts with each mode.
-      </SectionTitle>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {THEMES.map((t) => {
-          const active = s.theme === t.id;
-          const locked = t.pro && !canThemes;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => (t.pro ? gate("themes.all", () => set({ theme: t.id })) : set({ theme: t.id }))}
-              className={cn("group overflow-hidden rounded-[20px] text-left ring-2 transition-all", active ? "ring-ink" : "ring-transparent hover:ring-line")}
-            >
-              <div className="flex h-20">
-                {(["focus", "short", "long"] as const).map((m) => (
-                  <div key={m} className="relative flex-1" style={{ background: t.modes[m].bg }}>
-                    <span className="absolute bottom-2.5 left-3 size-3 rounded-full" style={{ background: t.modes[m].btn }} />
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center justify-between bg-fill px-4 py-3">
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-semibold">
-                    {t.name} {t.pro && <ProBadge />}
-                  </div>
-                  <div className="text-[12.5px] text-ink-3">{t.description}</div>
-                </div>
-                {active ? <Check size={16} weight="bold" /> : locked ? <LockSimple size={14} weight="bold" className="text-ink-3" /> : null}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      <Group title="Behaviour">
-        <Field label="Dim while running" hint="Deepens the background so the screen recedes.">
-          <Switch label="Dim while running" checked={s.dimWhenRunning} onChange={(v) => set({ dimWhenRunning: v })} />
-        </Field>
-        <Field label="Other pages" hint="Insights, settings and account.">
-          <Segmented
-            size="sm"
-            ariaLabel="Appearance"
-            value={appearance}
-            onChange={(v) => setPrefs({ appearance: v })}
-            options={[
-              { value: "system", label: "Auto" },
-              { value: "light", label: "Light" },
-              { value: "dark", label: "Dark" },
-            ]}
-          />
-        </Field>
-      </Group>
-    </>
-  );
-}
-
 export function NotificationsSection() {
   const [s, set] = useSettings();
   const [perm, setPerm] = useState<string>("default");
@@ -326,7 +256,7 @@ export function NotificationsSection() {
   return (
     <>
       <SectionTitle eyebrow="Alerts" title="Notifications">
-        Desktop notifications reach you when Cadence is in a background tab.
+        Desktop notifications reach you when Steen is in a background tab.
       </SectionTitle>
       <Group>
         <Field

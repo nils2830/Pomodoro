@@ -34,7 +34,7 @@ export function DataSection() {
             size="sm"
             variant="outline"
             icon={<DownloadSimple size={14} weight="bold" />}
-            onClick={() => downloadFile(`cadence-backup-${dayKey(Date.now())}.json`, createBackup(), "application/json")}
+            onClick={() => downloadFile(`steen-backup-${dayKey(Date.now())}.json`, createBackup(), "application/json")}
           >
             Backup
           </Button>

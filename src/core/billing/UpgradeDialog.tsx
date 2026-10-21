@@ -28,7 +28,7 @@ export function UpgradeDialog() {
         <div className="relative overflow-hidden rounded-t-[28px] bg-[oklch(0.555_0.135_32)] p-7 text-[oklch(0.985_0.012_85)] sm:rounded-l-[28px] sm:rounded-tr-none">
           <div className="pointer-events-none absolute -right-16 -bottom-20 size-64 rounded-full border-[28px] border-white/10" />
           <div className="pointer-events-none absolute -right-2 -bottom-6 size-24 rounded-full bg-white/10" />
-          <div className="eyebrow opacity-70">Cadence Pro</div>
+          <div className="eyebrow opacity-70">Steen Pro</div>
           <h2 className="display mt-4 text-[34px] leading-[0.95]">{focus ? focus.label : "Go deeper."}</h2>
           <p className="mt-3 max-w-[30ch] text-[15px] leading-snug opacity-85">
             {focus ? focus.detail : "The timer stays free. Pro is for seeing your patterns and shaping your space."}

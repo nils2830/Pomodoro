@@ -15,36 +15,35 @@ export default function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>Without an account</h2>
-        <p>
-          If you use {config.appName} without signing in, everything you enter (sessions, tasks, settings) is stored only in your own browser. It is not sent to
-          us.
-        </p>
-      </section>
-      <section>
-        <h2>With an account</h2>
+        <h2>What we store</h2>
         <ul>
           <li>
-            <strong>Account:</strong> your email address and sign-in records, so you can log in. Legal basis: providing the service you asked for (GDPR art.
-            6(1)(b)).
+            <strong>Account:</strong> your email address and sign-in records, so you can log in. If you sign in with Google or Apple, they confirm who you are
+            and share your email address with us (Apple can share a private relay address instead). Legal basis: providing the service you asked for (GDPR
+            art. 6(1)(b)).
           </li>
           <li>
-            <strong>Pro sync:</strong> if you have Pro, your sessions, tasks, activities and settings are stored on our servers so they can sync between your
-            devices. Same legal basis.
+            <strong>Your work:</strong> sessions, tasks, activities and settings. They are kept in your browser so the timer works offline, and saved to your
+            account so they are there on every device. Same legal basis.
           </li>
           <li>
             <strong>Payments:</strong> Stripe handles payments. We receive a customer reference, your subscription status and billing country, never your card
             number. We keep payment records for as long as bookkeeping law requires (art. 6(1)(c)).
           </li>
         </ul>
+        <p className="mt-3">
+          Signing out clears the copy in that browser. Deleting your account (Account → Delete account) erases your data from our database straight away,
+          apart from payment records we must keep.
+        </p>
       </section>
       <section>
         <h2>Who processes data for us</h2>
         <ul>
-          <li>Supabase: database and sign-in (hosted in the EU).</li>
+          <li>Supabase: database and sign-in.</li>
           <li>Stripe: payments.</li>
           <li>Vercel: hosting the website.</li>
           <li>Our email provider: sending sign-in links.</li>
+          <li>Google and Apple: only if you choose to sign in with them.</li>
         </ul>
         <p className="mt-3">
           Each acts on our instructions under a data processing agreement. Where data leaves the EU/EEA, it is covered by the EU&apos;s standard contractual

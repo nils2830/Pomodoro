@@ -4,7 +4,7 @@ import { create } from "zustand";
 import type { Feature } from "../billing/plans";
 import { uid } from "../lib/id";
 
-export type SettingsTab = "timer" | "tasks" | "sound" | "display" | "theme" | "notifications" | "activities" | "data";
+export type SettingsTab = "account" | "timer" | "warmup" | "tasks" | "sound" | "display" | "appearance" | "notifications" | "activities" | "data";
 
 export interface Toast {
   id: string;

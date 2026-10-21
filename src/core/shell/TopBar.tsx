@@ -23,7 +23,7 @@ export function TopBar() {
 
   return (
     <header className="relative z-20 mx-auto flex h-[72px] w-full max-w-[1320px] items-center gap-3 px-4 sm:px-6">
-      <Link href="/" aria-label="Cadence home" className="mr-2 shrink-0 rounded-full">
+      <Link href="/" aria-label="Steen home" className="mr-2 shrink-0 rounded-full">
         <Logo />
       </Link>
 

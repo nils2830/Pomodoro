@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Gift, MagnifyingGlass, PencilSimple, ShieldCheck, Trash } from "@phosphor-icons/react";
+import { CaretDown, CheckCircle, Gift, MagnifyingGlass, PencilSimple, ShieldCheck, Trash, WarningCircle, XCircle } from "@phosphor-icons/react";
 import { Button } from "@/core/ui/Button";
 import { Segmented } from "@/core/ui/Segmented";
 import { TextInput } from "@/core/ui/fields";
@@ -178,6 +178,8 @@ function AdminPanel() {
         ))}
       </div>
 
+      <LaunchChecklist />
+
       <div className="mt-12 grid gap-12 lg:grid-cols-[400px_1fr]">
         <section className="self-start rounded-[28px] bg-surface p-6 sm:p-7">
           <div className="flex items-center gap-2">
@@ -316,5 +318,67 @@ function AdminPanel() {
         </section>
       </div>
     </div>
+  );
+}
+
+interface HealthCheck {
+  id: string;
+  area: string;
+  label: string;
+  level: "ok" | "warn" | "fail";
+  detail: string;
+}
+
+const LEVEL_ICON = {
+  ok: <CheckCircle size={18} weight="fill" className="shrink-0 text-good" />,
+  warn: <WarningCircle size={18} weight="fill" className="shrink-0 text-[oklch(0.75_0.14_75)]" />,
+  fail: <XCircle size={18} weight="fill" className="shrink-0 text-bad" />,
+};
+
+/** What's ready for launch and what still needs setting up. Collapsed once everything is green. */
+function LaunchChecklist() {
+  const [checks, setChecks] = useState<HealthCheck[] | null>(null);
+  const [open, setOpen] = useState<boolean | null>(null);
+  useEffect(() => {
+    api<{ checks: HealthCheck[] }>("/api/admin/health")
+      .then((b) => setChecks(b.checks))
+      .catch(() => setChecks([]));
+  }, []);
+  if (!checks?.length) return null;
+  const todo = checks.filter((c) => c.level !== "ok").length;
+  const expanded = open ?? todo > 0;
+  const areas = [...new Set(checks.map((c) => c.area))];
+  return (
+    <section className="mt-10 rounded-[28px] bg-surface p-6 sm:p-7">
+      <button type="button" onClick={() => setOpen(!expanded)} aria-expanded={expanded} className="flex w-full items-center justify-between gap-4 text-left">
+        <div>
+          <h2 className="display text-[24px] leading-none">Launch checklist</h2>
+          <p className="mt-1.5 text-[14px] text-ink-3">{todo ? `${todo} thing${todo === 1 ? "" : "s"} left to set up.` : "Everything is set up."}</p>
+        </div>
+        <CaretDown size={16} weight="bold" className={cn("shrink-0 text-ink-3 transition-transform", expanded && "rotate-180")} />
+      </button>
+      {expanded && (
+        <div className="mt-6 grid gap-8 md:grid-cols-2">
+          {areas.map((area) => (
+            <div key={area}>
+              <div className="eyebrow text-ink-3">{area}</div>
+              <ul className="mt-2 divide-y divide-line border-y border-line">
+                {checks
+                  .filter((c) => c.area === area)
+                  .map((c) => (
+                    <li key={c.id} className="flex gap-3 py-3">
+                      {LEVEL_ICON[c.level]}
+                      <div className="min-w-0">
+                        <div className="text-[14.5px] font-medium">{c.label}</div>
+                        <div className="text-[13px] leading-snug break-words text-ink-3">{c.detail}</div>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Entry } from "@/core/data/entries";
 import { MINUTE, HOUR } from "@/core/lib/time";
 import {
+  warmupComparison,
   bucketize,
   computeKpis,
   groupSitDowns,
@@ -129,5 +130,21 @@ describe("distributions", () => {
     const p = firstStartPattern(groupSitDowns(list));
     expect(p?.medianMin).toBe(8 * 60 + 50);
     expect(p?.days).toBe(3);
+  });
+});
+
+describe("warmupComparison", () => {
+  it("labels each sit-down by whether its first session had a warm-up", () => {
+    const list = [
+      entry(at(1, 9), 25, { warmupMs: 90_000 }),
+      entry(at(1, 9, 30), 25), // same sit-down, no warm-up of its own
+      entry(at(2, 9), 25),
+      entry(at(3, 9), 50, { warmupMs: 60_000 }),
+    ];
+    const r = warmupComparison(list);
+    expect(r.warm.count).toBe(2);
+    expect(r.cold.count).toBe(1);
+    expect(r.warm.avgMs).toBe(50 * MINUTE);
+    expect(r.cold.avgMs).toBe(25 * MINUTE);
   });
 });

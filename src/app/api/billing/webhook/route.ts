@@ -59,9 +59,13 @@ export async function POST(req: Request) {
       }
       case "customer.subscription.created":
       case "customer.subscription.updated":
-      case "customer.subscription.deleted":
-        await applySubscription(event.data.object);
+      case "customer.subscription.deleted": {
+        // Events can arrive out of order, so read the subscription as it is now.
+        const sent = event.data.object;
+        const current = await stripe.subscriptions.retrieve(sent.id).catch(() => sent);
+        await applySubscription(current);
         break;
+      }
     }
   } catch (err) {
     // A 500 makes Stripe retry the event later.

@@ -25,7 +25,7 @@ export function createDocument<T extends object>(name: string, defaults: T, opts
         reset: () => set({ doc: defaults, updatedAt: Date.now() }),
       }),
       {
-        name: `cadence:${name}`,
+        name: `steen:${name}`,
         version: 1,
         storage: createJSONStorage(() => localStorage),
         partialize: (s) => ({ doc: s.doc, updatedAt: s.updatedAt }) as unknown as DocumentState<T>,

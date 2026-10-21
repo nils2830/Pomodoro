@@ -18,7 +18,7 @@ export async function requestNotifications(): Promise<boolean> {
 export function notify(title: string, body?: string): void {
   if (!notificationsSupported() || Notification.permission !== "granted") return;
   try {
-    const n = new Notification(title, { body, icon: "/icon.svg", tag: "cadence-timer", silent: true });
+    const n = new Notification(title, { body, icon: "/icon.svg", tag: "steen-timer", silent: true });
     n.onclick = () => {
       window.focus();
       n.close();

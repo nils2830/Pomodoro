@@ -7,16 +7,16 @@ import { confirmAction } from "@/core/ui/store";
 import { MINUTE } from "@/core/lib/time";
 import { useTimer } from "../store/timer";
 import { elapsedOf } from "../engine/logic";
+import { requestStartToggle } from "../warmup/store";
 
 export function StartButton({ size = "lg" }: { size?: "lg" | "md" }) {
   const status = useTimer((s) => s.status);
-  const toggle = useTimer((s) => s.toggle);
   const running = status === "running";
   const label = running ? "Pause" : status === "paused" ? "Resume" : "Start";
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={requestStartToggle}
       aria-label={label}
       className={cn(
         "display relative rounded-full bg-btn text-btn-ink uppercase transition-[transform,box-shadow,filter] duration-150 select-none hover:brightness-[1.04]",

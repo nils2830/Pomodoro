@@ -20,7 +20,7 @@ import { MODE_LABEL } from "../labels";
 export function useTimerEngine() {
   // Tick: completion, reminder, title, ambient sound.
   useEffect(() => {
-    const baseTitle = document.title.includes("Cadence") ? "Cadence" : document.title;
+    const baseTitle = document.title.includes("Steen") ? "Steen" : document.title;
 
     const tick = () => {
       const t = useTimer.getState();

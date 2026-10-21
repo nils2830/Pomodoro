@@ -9,6 +9,7 @@ import { MINUTE } from "@/core/lib/time";
 import { useTimer } from "../store/timer";
 import { useFocusSettings } from "../store/settings";
 import { TimerStage } from "./TimerStage";
+import { requestStartToggle, useWarmup } from "../warmup/store";
 import { TaskPanel } from "./TaskPanel";
 import { ProgressLine } from "./ProgressLine";
 
@@ -20,7 +21,7 @@ export function FocusView() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (document.querySelector("dialog[open]")) return;
+      if (document.querySelector("dialog[open]") || useWarmup.getState().stage !== "closed") return;
       const t = useTimer.getState();
       const settings = useFocusSettings.getState();
       switch (e.key) {
@@ -29,7 +30,7 @@ export function FocusView() {
           // blur it so the browser doesn't also "click" it on keyup.
           e.preventDefault();
           (document.activeElement as HTMLElement | null)?.blur();
-          if (!e.repeat) t.toggle();
+          if (!e.repeat) requestStartToggle();
           break;
         case "s":
         case "S":

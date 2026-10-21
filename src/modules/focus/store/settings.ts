@@ -2,6 +2,7 @@
 
 import { createDocument } from "@/core/data/document";
 import type { FocusSettings } from "../types";
+import { WARMUP_DEFAULT_SECONDS } from "../warmup/protocol";
 
 export const DEFAULT_FOCUS_SETTINGS: FocusSettings = {
   durations: { focus: 25, short: 5, long: 15 },
@@ -20,11 +21,18 @@ export const DEFAULT_FOCUS_SETTINGS: FocusSettings = {
   hideTimer: false,
   showSeconds: true,
   theme: "ember",
+  background: "none",
+  backgroundDim: 0.3,
   dimWhenRunning: false,
   timeInTitle: true,
   notifications: true,
   reminderMinutes: 0,
   dailyGoalMinutes: 120,
+  warmupWhen: "sitdown",
+  warmupSeconds: WARMUP_DEFAULT_SECONDS,
+  warmupEyesClosed: true,
+  warmupFirstStep: true,
+  warmupTone: true,
 };
 
 export const useFocusSettings = createDocument<FocusSettings>("focus.settings", DEFAULT_FOCUS_SETTINGS);

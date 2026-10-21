@@ -86,7 +86,7 @@ export function createCollection<T extends BaseRecord>(name: string, opts: { see
           }),
       }),
       {
-        name: `cadence:${name}`,
+        name: `steen:${name}`,
         version: 1,
         storage: createJSONStorage(() => localStorage),
         partialize: (s) => ({ items: s.items }) as unknown as CollectionState<T>,

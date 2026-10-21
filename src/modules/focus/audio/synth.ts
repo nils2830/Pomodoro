@@ -3,7 +3,7 @@
 import type { AlarmId, AmbientId } from "../types";
 
 /**
- * Every sound in Cadence is synthesised with the Web Audio API:
+ * Every sound in Steen is synthesised with the Web Audio API:
  * no audio files to ship, license or load.
  */
 
@@ -161,6 +161,31 @@ export function playAlarm(id: AlarmId, volume: number, repeat = 1): void {
     out.connect(c.destination);
     let t = c.currentTime + 0.05;
     for (let i = 0; i < Math.max(1, repeat); i++) t += voice(c, out, t) + 0.25;
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * The warm-up's "open your eyes" cue: one low, soft singing-bowl tone with a
+ * slow attack, so it reaches closed eyes without startling.
+ */
+export function playSoftTone(volume = 0.35): void {
+  if (volume <= 0) return;
+  try {
+    const c = ac();
+    const out = c.createGain();
+    out.gain.value = volume;
+    out.connect(c.destination);
+    const t = c.currentTime + 0.05;
+    const f0 = 293.66;
+    for (const [ratio, amp] of [
+      [1, 0.32],
+      [2.01, 0.09],
+      [2.98, 0.04],
+    ] as const) {
+      tone(c, out, "sine", f0 * ratio, t, amp, 0.18, 3.2 / ratio);
+    }
   } catch {
     // ignore
   }

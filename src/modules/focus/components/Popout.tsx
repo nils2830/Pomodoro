@@ -72,7 +72,7 @@ export async function openPopout(): Promise<void> {
       }
     }
   }
-  pip.document.title = "Cadence";
+  pip.document.title = "Steen";
   pip.document.body.style.margin = "0";
   const container = pip.document.createElement("div");
   pip.document.body.appendChild(container);

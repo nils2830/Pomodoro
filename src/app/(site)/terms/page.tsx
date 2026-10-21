@@ -19,7 +19,7 @@ export default function TermsPage() {
       <section>
         <h2>The service</h2>
         <p>
-          {config.appName} is a focus timer with task lists and insights into how you spend your time. The free plan can be used without an account. Pro adds
+          {config.appName} is a focus timer with task lists and insights into how you spend your time. Using it requires a free account. Pro adds
           the features listed on the <Link href="/pricing">pricing page</Link>.
         </p>
       </section>

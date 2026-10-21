@@ -30,6 +30,8 @@ export interface Entry extends BaseRecord {
   projectId: string | null;
   source: EntrySource;
   note?: string;
+  /** Length of the warm-up that led into this focus session, if any. */
+  warmupMs?: number | null;
 }
 
 export const useEntries = createCollection<Entry>("entries");

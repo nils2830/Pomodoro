@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 import { useAuth } from "../auth/store";
-import { useCan } from "../billing/entitlements";
 import { getSyncables } from "./record";
 import { syncNow, type SyncStatus } from "./sync";
 
@@ -16,13 +15,12 @@ export const useSyncStatus = create<SyncStatus & { requestSync: () => void }>()(
 const INTERVAL = 60_000;
 const DEBOUNCE = 4_000;
 
-/** Runs sync for signed-in Pro users: on start, on change, on focus, every minute. */
+/** Keeps the account and this device in step: on start, on change, on focus, every minute. */
 export function SyncProvider() {
-  const userId = useAuth((s) => s.user?.id ?? null);
-  const canSync = useCan("sync");
+  const userId = useAuth((s) => (s.status === "signedIn" ? (s.user?.id ?? null) : null));
 
   useEffect(() => {
-    if (!userId || !canSync) return;
+    if (!userId) return;
     let running = false;
     let queued = false;
     let timer: number | undefined;
@@ -67,7 +65,7 @@ export function SyncProvider() {
       document.removeEventListener("visibilitychange", onVisible);
       useSyncStatus.setState({ requestSync: () => {} });
     };
-  }, [userId, canSync]);
+  }, [userId]);
 
   return null;
 }

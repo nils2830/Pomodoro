@@ -5,6 +5,8 @@ import { config } from "../config";
 import { getSupabase } from "./supabase-browser";
 import { useAuth, type Profile } from "./store";
 import type { ProGrant } from "../billing/grants";
+import { claimLocalData, wipeLocalData } from "./ownership";
+import { syncNow } from "../data/sync";
 
 async function loadAccount(userId: string): Promise<{ profile: Profile | null; grant: ProGrant | null }> {
   const sb = getSupabase();
@@ -40,13 +42,21 @@ export function AuthProvider() {
         set({ status: "signedOut", user: null, profile: null, grant: null, isAdmin: false });
         return;
       }
+      // Never let one person's local data sync into another person's account.
+      if (claimLocalData(user.id) === "switched") {
+        window.location.reload();
+        return;
+      }
       set({ status: "signedIn", user });
       const [account, isAdmin] = await Promise.all([loadAccount(user.id), loadIsAdmin()]);
       if (!cancelled) set({ ...account, isAdmin });
     };
 
-    sb.auth.getUser().then(({ data }) => apply(data.user ?? null));
-    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+    // Fires INITIAL_SESSION straight away from the stored session, so the app
+    // keeps working while Supabase is unreachable. The proxy verifies the
+    // session on the server for every page load.
+    const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
+      if (event === "TOKEN_REFRESHED") return;
       apply(session?.user ?? null);
     });
 
@@ -67,6 +77,18 @@ export function AuthProvider() {
   return null;
 }
 
+/**
+ * Signs out on this device: saves pending changes to the account first
+ * (best effort, a few seconds at most), then clears the local copy and
+ * returns to the welcome page.
+ */
 export async function signOut(): Promise<void> {
-  await getSupabase()?.auth.signOut();
+  const sb = getSupabase();
+  const userId = useAuth.getState().user?.id;
+  if (sb && userId) {
+    await Promise.race([syncNow(userId).catch(() => {}), new Promise((r) => setTimeout(r, 4000))]);
+  }
+  await sb?.auth.signOut().catch(() => {});
+  wipeLocalData();
+  window.location.assign("/welcome");
 }

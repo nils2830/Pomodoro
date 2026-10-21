@@ -18,7 +18,7 @@ type Cursors = Record<string, { pulled: number; pushed: number }>;
 
 export type SyncStatus = { state: "idle" | "syncing" | "error"; lastSyncedAt: number | null; error?: string };
 
-const cursorKey = (userId: string) => `cadence:sync-cursors:${userId}`;
+const cursorKey = (userId: string) => `steen:sync-cursors:${userId}`;
 
 function readCursors(userId: string): Cursors {
   try {

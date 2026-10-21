@@ -86,6 +86,31 @@ export function groupSitDowns(sorted: Entry[], gapMs = SIT_DOWN_GAP_MS): SitDown
   return out;
 }
 
+/**
+ * Compares sit-downs that opened with a warm-up against those that didn't,
+ * by how long you stayed. Expects focus entries sorted by start.
+ */
+export function warmupComparison(sorted: Entry[], gapMs = SIT_DOWN_GAP_MS): { warm: { count: number; avgMs: number }; cold: { count: number; avgMs: number } } {
+  const groups: { warm: boolean; focusMs: number }[] = [];
+  let cur: { warm: boolean; focusMs: number } | null = null;
+  let end = Number.NEGATIVE_INFINITY;
+  for (const e of sorted) {
+    if (cur && e.startedAt - end <= gapMs) {
+      cur.focusMs += e.durationMs;
+      end = Math.max(end, e.endedAt);
+    } else {
+      cur = { warm: (e.warmupMs ?? 0) > 0, focusMs: e.durationMs };
+      groups.push(cur);
+      end = e.endedAt;
+    }
+  }
+  const summary = (warm: boolean) => {
+    const g = groups.filter((x) => x.warm === warm);
+    return { count: g.length, avgMs: g.length ? g.reduce((sum, x) => sum + x.focusMs, 0) / g.length : 0 };
+  };
+  return { warm: summary(true), cold: summary(false) };
+}
+
 // ───────────────────────── Headline numbers ─────────────────────────
 
 export interface Kpis {
@@ -440,6 +465,25 @@ export function observations(
       title: `You finish ${pct(kpis.completionRate)} of the sessions you start`,
       detail: kpis.completionRate >= 0.85 ? "When you sit down, you tend to stay." : "If you often stop early, try a shorter focus length for a while.",
     });
+  }
+
+  // Warm-up. Correlation only: people may warm up on days they already meant to stay.
+  const wu = warmupComparison(focus);
+  if (wu.warm.count >= 4 && wu.cold.count >= 4) {
+    const diff = (wu.warm.avgMs - wu.cold.avgMs) / Math.max(1, wu.cold.avgMs);
+    out.push(
+      Math.abs(diff) >= 0.1
+        ? {
+            id: "warmup",
+            title: `Sit-downs after a warm-up run ${pct(Math.abs(diff))} ${diff > 0 ? "longer" : "shorter"}`,
+            detail: `${fmtDur(wu.warm.avgMs)} on average after a warm-up (${wu.warm.count} times), against ${fmtDur(wu.cold.avgMs)} without (${wu.cold.count}). A pattern in your data, not proof of cause.`,
+          }
+        : {
+            id: "warmup",
+            title: "Warm-up or not, you stay about as long",
+            detail: `${fmtDur(wu.warm.avgMs)} after a warm-up, ${fmtDur(wu.cold.avgMs)} without. Keep it if it makes starting easier.`,
+          },
+    );
   }
 
   // Dominant activity.

@@ -18,6 +18,7 @@ import { Controls } from "./Controls";
 import { FacePicker } from "./FacePicker";
 import { ActivityPicker } from "./ActivityPicker";
 import { openPopout } from "./Popout";
+import { usePendingWarmup } from "../warmup/store";
 
 function Face({ zen }: { zen: boolean }) {
   const props = useFaceProps(zen ? "zen" : "stage");
@@ -84,6 +85,8 @@ export function TimerStage() {
   const flow = useTimer((s) => s.flow && s.mode === "focus");
   const extend = useTimer((s) => s.extend);
   const gate = useGate();
+  const warmup = usePendingWarmup();
+  const openSettings = useUI((s) => s.openSettings);
 
   const toolbar = (
     <div className="flex items-center gap-0.5">
@@ -119,6 +122,17 @@ export function TimerStage() {
       <div className="flex flex-col items-center gap-3">
         <Controls />
         <div className="h-8">
+          {warmup != null && !zen && (
+            <button
+              type="button"
+              onClick={() => openSettings("warmup")}
+              title="Warm-up settings"
+              className="animate-fade inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] text-ink-3 hover:bg-fill hover:text-ink"
+            >
+              <span className="size-1.5 rounded-full bg-current" />
+              Starts with a {warmup >= 60 && warmup % 60 === 0 ? `${warmup / 60} min` : `${warmup} s`} warm-up
+            </button>
+          )}
           {status === "running" && !flow && (
             <button
               type="button"

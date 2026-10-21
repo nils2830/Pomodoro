@@ -15,7 +15,7 @@ export const FEATURES = {
   export: { label: "CSV export", detail: "Every session in a spreadsheet-ready file." },
   "sounds.all": { label: "Full sound library", detail: "All alarm tones plus rain, ocean and noise soundscapes." },
   "themes.all": { label: "All themes", detail: "Grove, Velvet and Citrus colour themes." },
-  sync: { label: "Cloud sync", detail: "Your data on every device, backed up." },
+  "backgrounds.all": { label: "Every landscape", detail: "Pebbles, moss forest, sandstone and night ridge behind your timer." },
   popout: { label: "Pop-out timer", detail: "A floating mini timer that stays on top." },
 } as const;
 
@@ -39,7 +39,7 @@ export const PRO_HIGHLIGHTS: Feature[] = [
   "insights.history",
   "faces.all",
   "flow",
-  "sync",
+  "backgrounds.all",
   "sounds.all",
   "activities.unlimited",
   "projects",
@@ -51,10 +51,11 @@ export const PRO_HIGHLIGHTS: Feature[] = [
 
 export const FREE_INCLUDES: string[] = [
   "Focus, short and long break timer",
-  "Hide the timer, ring and wall-clock faces",
+  "The focus warm-up, at any length",
+  "Hide the timer; ring and wall-clock faces",
   "Tasks with estimates and notes",
   "Up to 3 activities",
   "Last 7 days of insights",
-  "Daily goal and streaks",
-  "Notifications, shortcuts and zen mode",
+  "Your data synced to your account",
+  "Two landscapes, every font",
 ];

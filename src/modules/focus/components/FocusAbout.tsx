@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 
 const STEPS = [
-  ["Write down what's next", "Add tasks and estimate how many sessions each will take. Pick the one you're on."],
-  ["Say what kind of work it is", "Study, work, reading, or your own activities. This is what Insights groups your time by."],
+  ["Write down what's next", "Add tasks, estimate the sessions, and say what kind of work it is. Insights groups your time by it."],
+  ["Warm up", "When you sit down: name your first step, then rest your eyes on a dot for 30 seconds to 3 minutes."],
   ["Start, then forget the clock", "25 minutes by default. Hide the timer or switch to a face that doesn't count seconds."],
   ["Take the break", "5 minutes after each session, a longer one after every fourth. Breaks are part of the method."],
 ];
@@ -22,18 +22,19 @@ export function FocusAbout() {
       <div className="mx-auto max-w-[1180px] px-5 pt-20 pb-32 sm:px-8">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
           <div>
-            <div className="eyebrow text-ink-3">About Cadence</div>
+            <div className="eyebrow text-ink-3">About Steen</div>
             <h2 className="display mt-4 text-[clamp(2.4rem,5vw,4rem)] leading-[0.92]">A timer that gets out of your way.</h2>
           </div>
           <div className="space-y-4 self-end text-[17px] leading-relaxed text-ink-2">
             <p>
-              Cadence is built on the Pomodoro Technique: short, single-minded work sessions separated by deliberate breaks. Francesco Cirillo developed it in
+              Steen is built on the Pomodoro Technique: short, single-minded work sessions separated by deliberate breaks. Francesco Cirillo developed it in
               the late 1980s with a tomato-shaped kitchen timer; the idea has outlived the tomato because it lowers the cost of starting and makes rest
               non-negotiable.
             </p>
             <p>
-              Where Cadence differs is what happens around the timer. A ticking countdown can become its own distraction, so you can hide it or pick a face with
-              no seconds at all. And every session is logged, so you can see how often you actually sit down, when, and for how long.
+              Where Steen differs is what happens around the timer. A short warm-up, inspired by the steady-gaze practice trataka, gives every sit-down the same
+              calm start. A ticking countdown can become its own distraction, so you can hide it or pick a face with no seconds at all. And every session is
+              logged, so you can see how often you actually sit down, when, and for how long.
             </p>
           </div>
         </div>
@@ -66,7 +67,7 @@ export function FocusAbout() {
               <div className="eyebrow opacity-60">Insights</div>
               <h3 className="display mt-4 text-[34px] leading-none">See your rhythm.</h3>
               <p className="mt-4 max-w-[42ch] text-[15px] leading-relaxed opacity-75">
-                How many times a day you sit down, how long you stay, which hours work for you and which days slip. Cadence groups back-to-back sessions into
+                How many times a day you sit down, how long you stay, which hours work for you and which days slip. Steen groups back-to-back sessions into
                 sit-downs so the numbers match how your day actually felt.
               </p>
             </div>

@@ -176,9 +176,35 @@ export function getTheme(id: string): ThemeDef {
   return THEMES.find((t) => t.id === id) ?? THEMES[0];
 }
 
-/** CSS variables that recolour the shell for a timer mode. */
-export function modeVars(theme: ThemeDef, mode: TimerModeKey, dim: boolean): CSSProperties {
+/**
+ * CSS variables that recolour the shell for a timer mode.
+ * With a photo background the ink is always light and surfaces are glass,
+ * so text stays readable whatever the landscape.
+ */
+export function modeVars(theme: ThemeDef, mode: TimerModeKey, dim: boolean, opts: { photo?: boolean } = {}): CSSProperties {
   const m = theme.modes[mode];
+  if (opts.photo) {
+    const tint = theme.ink === "light" ? m.bg : m.accent;
+    const mixP = (pct: number) => `color-mix(in oklab, ${LIGHT_INK} ${pct}%, transparent)`;
+    return {
+      // Solid, so text set in the page colour (active pills) stays readable; the photo layer paints above it.
+      "--c-page": `color-mix(in oklab, ${tint} 28%, #0b0a09)`,
+      "--c-surface": "rgb(12 11 10 / 0.34)",
+      "--c-raised": "rgb(12 11 10 / 0.5)",
+      "--c-ink": LIGHT_INK,
+      "--c-ink-2": mixP(80),
+      "--c-ink-3": mixP(60),
+      "--c-line": mixP(20),
+      "--c-fill": mixP(13),
+      "--c-accent": LIGHT_INK,
+      "--c-glow": "transparent",
+      "--c-btn": LIGHT_INK,
+      "--c-btn-ink": `color-mix(in oklab, ${tint} 80%, black)`,
+      "--c-btn-shadow": "rgb(0 0 0 / 0.55)",
+      "--c-tint": tint,
+      colorScheme: "dark",
+    } as CSSProperties;
+  }
   const ink = theme.ink === "light" ? LIGHT_INK : DARK_INK;
   const mix = (pct: number) => `color-mix(in oklab, ${ink} ${pct}%, transparent)`;
   return {

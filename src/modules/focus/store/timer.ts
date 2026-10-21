@@ -12,11 +12,15 @@ import { timerEvents } from "../engine/events";
 import { unlockAudio } from "../audio/synth";
 
 interface TimerState extends TimerCore {
+  /** Warm-up before this segment, logged with the session. */
+  warmupMs: number;
   activityId: string;
   activeTaskId: string | null;
   setMode(mode: TimerMode): void;
   setFlow(): void;
   start(): void;
+  /** Starts focus straight after a warm-up and remembers how long it was. */
+  startAfterWarmup(warmupMs: number): void;
   pause(): void;
   toggle(): void;
   reset(): void;
@@ -41,6 +45,7 @@ const fresh = (mode: TimerMode, plannedMs: number) => ({
   segmentStartedAt: null,
   pauses: 0,
   reminderFired: false,
+  warmupMs: 0,
 });
 
 export const useTimer = create<TimerState>()(
@@ -61,6 +66,12 @@ export const useTimer = create<TimerState>()(
         unlockAudio();
         const now = Date.now();
         set((s) => (s.status === "running" ? s : { status: "running", runStartedAt: now, segmentStartedAt: s.segmentStartedAt ?? now }));
+      },
+
+      startAfterWarmup: (warmupMs) => {
+        if (get().status !== "idle") return;
+        set({ warmupMs: Math.max(0, Math.round(warmupMs)) });
+        get().start();
       },
 
       pause: () => {
@@ -107,6 +118,7 @@ export const useTimer = create<TimerState>()(
             taskTitle: kind === "focus" ? (liveTask?.title ?? null) : null,
             projectId: kind === "focus" ? (liveTask?.projectId ?? null) : null,
             source: "timer",
+            ...(kind === "focus" && s.warmupMs > 0 ? { warmupMs: s.warmupMs } : {}),
           });
         }
 
@@ -155,7 +167,7 @@ export const useTimer = create<TimerState>()(
       },
     }),
     {
-      name: "cadence:focus.timer",
+      name: "steen:focus.timer",
       version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => {
@@ -171,6 +183,7 @@ export const useTimer = create<TimerState>()(
           cycle,
           round,
           reminderFired,
+          warmupMs,
           activityId,
           activeTaskId,
         } = s;
@@ -186,6 +199,7 @@ export const useTimer = create<TimerState>()(
           cycle,
           round,
           reminderFired,
+          warmupMs,
           activityId,
           activeTaskId,
         } as TimerState;

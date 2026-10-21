@@ -61,9 +61,21 @@ export interface FocusSettings {
   hideTimer: boolean;
   showSeconds: boolean;
   theme: string;
+  /** Landscape behind the timer page, or "none" for the theme colour. */
+  background: string;
+  /** Extra shade over the landscape, 0..0.7. */
+  backgroundDim: number;
   dimWhenRunning: boolean;
   timeInTitle: boolean;
   notifications: boolean;
   reminderMinutes: number; // 0 = off
   dailyGoalMinutes: number;
+  /** When the focus warm-up runs: before a new sit-down, before every focus session, or never. */
+  warmupWhen: "sitdown" | "always" | "off";
+  /** Whole warm-up length, 30-180 s. */
+  warmupSeconds: number;
+  warmupEyesClosed: boolean;
+  /** Ask for the first small step before the warm-up. */
+  warmupFirstStep: boolean;
+  warmupTone: boolean;
 }

@@ -106,10 +106,34 @@
   color-scheme: dark;
 }
 
+/* The marketing site (welcome, sign-in, pricing) always wears night. */
+.night {
+  --c-page: #0c0b0a;
+  --c-surface: #161513;
+  --c-raised: #1f1d1a;
+  --c-ink: #f3eee6;
+  --c-ink-2: #bcb5a9;
+  --c-ink-3: #857e73;
+  --c-line: rgb(243 238 230 / 0.11);
+  --c-fill: rgb(243 238 230 / 0.06);
+  --c-accent: #f1c9a2;
+  --c-glow: #3a2a20;
+  --c-btn: #f3eee6;
+  --c-btn-ink: #12110f;
+  --c-btn-shadow: #000;
+  --c-good: #5fcf7a;
+  --c-bad: #ef7d6d;
+  --seq: #f1c9a2;
+  color-scheme: dark;
+  color: var(--c-ink);
+  background: var(--c-page);
+}
+
 @theme inline {
-  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", monospace;
+  /* --font-user is set from Settings → Appearance; Geologica is the house face. */
+  --font-display: var(--font-user, "Geologica Variable"), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-user, "Geologica Variable"), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Martian Mono Variable", ui-monospace, "SFMono-Regular", monospace;
 
   --color-page: var(--c-page);
   --color-surface: var(--c-surface);
@@ -143,7 +167,7 @@ body {
   background: var(--c-page);
   color: var(--c-ink);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11";
+  font-variation-settings: "SHRP" 0;
   min-height: 100svh;
 }
 
@@ -154,6 +178,10 @@ body {
 :focus-visible {
   outline: 2px solid var(--c-ink);
   outline-offset: 3px;
+}
+/* Fields that draw their own focus ring around a wrapper. */
+.own-focus:focus-visible {
+  outline: none;
 }
 
 button {
@@ -181,30 +209,32 @@ input[type="number"] {
 
 /* ───────────────────────── Type ───────────────────────── */
 
+/* Headlines use Geologica's "sharpness" axis: the corners are cut like
+   chiselled stone. Other fonts simply ignore the axis. */
 .display {
   font-family: var(--font-display);
-  font-stretch: 88%;
-  font-variation-settings: "wdth" 88;
-  letter-spacing: -0.025em;
-  font-weight: 650;
+  font-variation-settings: "SHRP" 100;
+  letter-spacing: -0.035em;
+  font-weight: 620;
 }
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-variation-settings: "wdth" 87.5;
+  font-size: 10.5px;
   line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-weight: 450;
 }
 
 .timer-digits {
   font-family: var(--font-display);
-  font-weight: 620;
-  font-stretch: 75%;
-  font-variation-settings: "wdth" 75;
-  letter-spacing: -0.02em;
-  line-height: 0.82;
+  font-weight: var(--timer-weight, 300);
+  font-variation-settings: "SHRP" 40;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+  line-height: 0.86;
 }
 
 .tnum {
@@ -278,6 +308,62 @@ input[type="number"] {
   }
 }
 
+@keyframes cairn-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-9px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0.6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+
+.cairn-stone {
+  animation: cairn-drop 0.9s var(--ease-out-soft) both;
+  transform-box: fill-box;
+}
+.animate-marquee {
+  animation: marquee 48s linear infinite;
+}
+.animate-bob {
+  animation: bob 7s ease-in-out infinite;
+}
+.animate-ken-burns {
+  animation: ken-burns 2.6s var(--ease-out-soft) both;
+}
 .animate-breathe {
   animation: breathe 5.5s ease-in-out infinite;
 }

@@ -25,5 +25,5 @@ export function exportSessionsCsv(): void {
     source: e.source,
     note: e.note ?? "",
   }));
-  downloadFile(`cadence-sessions-${dayKey(Date.now())}.csv`, toCsv(rows), "text/csv");
+  downloadFile(`steen-sessions-${dayKey(Date.now())}.csv`, toCsv(rows), "text/csv");
 }
