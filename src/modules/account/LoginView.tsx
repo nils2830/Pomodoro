@@ -105,6 +105,17 @@ export function LoginView() {
           </>
         )}
         {error && <p className="mt-4 text-[14px] text-bad">{error}</p>}
+        <p className="mt-6 text-center text-[12.5px] text-ink-3">
+          By continuing you agree to the{" "}
+          <Link href="/terms" className="underline underline-offset-2 hover:text-ink">
+            terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-ink">
+            privacy policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

@@ -3,14 +3,14 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowsClockwise, CloudCheck, CloudSlash, CreditCard, HardDrives, SignOut, Sparkle } from "@phosphor-icons/react";
+import { ArrowsClockwise, CloudCheck, CloudSlash, CreditCard, HardDrives, ShieldCheck, SignOut, Sparkle } from "@phosphor-icons/react";
 import { Button } from "@/core/ui/Button";
 import { Switch } from "@/core/ui/Switch";
 import { toast, useUI } from "@/core/ui/store";
 import { config } from "@/core/config";
 import { useAuth } from "@/core/auth/store";
 import { signOut } from "@/core/auth/AuthProvider";
-import { usePlan } from "@/core/billing/entitlements";
+import { usePlan, useProSource } from "@/core/billing/entitlements";
 import { openBillingPortal } from "@/core/billing/checkout";
 import { usePrefs } from "@/core/prefs";
 import { useSyncStatus } from "@/core/data/SyncProvider";
@@ -31,8 +31,19 @@ function Row({ label, children, hint }: { label: string; children: React.ReactNo
 }
 
 export function AccountView() {
-  const { status, user, profile } = useAuth();
+  const { status, user, profile, grant, isAdmin } = useAuth();
   const plan = usePlan();
+  const source = useProSource();
+  const planHint =
+    source === "subscription"
+      ? `${profile?.plan_status === "past_due" ? "Payment overdue. " : ""}Renews ${profile?.current_period_end ? new Date(profile.current_period_end).toLocaleDateString() : "automatically"}`
+      : source === "gift"
+        ? grant?.expires_at
+          ? `A gift, active until ${new Date(grant.expires_at).toLocaleDateString()}`
+          : "A gift, no end date"
+        : source === "demo"
+          ? "Unlocked in demo mode"
+          : "Free: the timer, tasks and 7 days of insights.";
   const demoPro = usePrefs((s) => s.doc.demoPro);
   const setPrefs = usePrefs((s) => s.set);
   const sync = useSyncStatus();
@@ -58,16 +69,7 @@ export function AccountView() {
       </p>
 
       <div className="mt-10 border-t border-ink/80">
-        <Row
-          label="Plan"
-          hint={
-            plan === "pro"
-              ? profile?.plan === "pro"
-                ? `Renews ${profile.current_period_end ? new Date(profile.current_period_end).toLocaleDateString() : ""}`
-                : "Unlocked in demo mode"
-              : "Free: the timer, tasks and 7 days of insights."
-          }
-        >
+        <Row label="Plan" hint={planHint}>
           <span className="rounded-full bg-ink px-3 py-1 font-mono text-[11px] tracking-[0.12em] text-page uppercase">{plan}</span>
           {plan === "free" && (
             <Link href="/pricing" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold hover:bg-fill">
@@ -131,6 +133,14 @@ export function AccountView() {
               </Button>
             </Row>
           </>
+        )}
+
+        {isAdmin && (
+          <Row label="Admin" hint="See members and give Pro to friends.">
+            <Link href="/admin" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold hover:bg-fill">
+              <ShieldCheck size={14} weight="bold" /> Open
+            </Link>
+          </Row>
         )}
 
         <Row label="Backup & data" hint="Download, restore or erase what's stored here.">

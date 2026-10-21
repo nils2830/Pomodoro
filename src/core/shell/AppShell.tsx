@@ -8,6 +8,7 @@ import { ShortcutsDialog } from "./ShortcutsDialog";
 import { useAppearance } from "./useAppearance";
 import { useModeColors } from "./useModeColors";
 import { ClientOnly } from "./ClientOnly";
+import { SiteFooter } from "./SiteFooter";
 import { Toaster } from "../ui/Toaster";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { useUI } from "../ui/store";
@@ -55,7 +56,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SyncProvider />
       </ClientOnly>
       {!zen && <TopBar />}
-      <main className="relative z-[1] flex-1 pb-24 md:pb-0">{children}</main>
+      <main className="relative z-[1] flex-1">{children}</main>
+      {!zen && <SiteFooter className={cn("pb-24 md:pb-0", isFocus && "neutral bg-page")} />}
       {!zen && <MobileNav />}
       <ClientOnly>
         <SettingsDialog />

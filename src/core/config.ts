@@ -15,4 +15,10 @@ export const config = {
   },
   billingEnabled: process.env.NEXT_PUBLIC_BILLING_ENABLED === "true",
   demoProAllowed: process.env.NEXT_PUBLIC_ALLOW_DEMO_PRO === "true",
+  /** Shown on the terms and privacy pages. */
+  legal: {
+    owner: process.env.NEXT_PUBLIC_LEGAL_NAME || "[your name]",
+    country: process.env.NEXT_PUBLIC_LEGAL_COUNTRY || "Denmark",
+    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "[your contact email]",
+  },
 } as const;

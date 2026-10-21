@@ -79,33 +79,21 @@ With the example env file Cadence runs in **local mode**: no accounts, everythin
 | `npm run format`              | Prettier                                   |
 | `npm run check`               | Typecheck, tests and format check together |
 
-## Turning on accounts, sync and payments
+## Launching it
 
-Each step is optional and the app keeps working without the ones you skip.
+**[docs/launch.md](docs/launch.md)** walks through it step by step: putting the site online with Vercel, accounts with Supabase, making sign-in emails or Google login work, becoming admin, setting up the Stripe paywall in test mode, and going live (domain, VAT, legal pages).
 
-### 1. Supabase (accounts and cloud sync)
+In short:
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. Run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) in the SQL editor. It creates `profiles` (plan and billing state) and one generic `records` table that every module syncs into, with row-level security. Writes to `records` require an active Pro plan, enforced in the database, not just the UI.
-3. Under Authentication, enable Email (magic link) and optionally Google, and add `https://your-domain/auth/callback` to the redirect URLs.
-4. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`.
+| Piece             | Service                                                                       | What it unlocks                                                 |
+| ----------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Hosting           | Vercel (from this GitHub repo)                                                | Public URL, auto-deploy on every push                           |
+| Accounts and sync | Supabase (run both SQL files in [`supabase/migrations`](supabase/migrations)) | Sign-in page, cloud sync, admin                                 |
+| Payments          | Stripe                                                                        | Checkout, customer portal, webhook that switches Pro on and off |
 
-Docs: [Supabase Auth with Next.js](https://supabase.com/docs/guides/auth/server-side/nextjs), [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
+**Giving friends Pro.** Put your email in `ADMIN_EMAILS`, sign in, and open **/admin**. Enter any email with an end date or "forever"; it works even before they sign up. Pro is "paying subscription OR active gift", checked both in the app and in the database.
 
-### 2. Stripe (Pro subscriptions)
-
-1. Create a product "Cadence Pro" with a monthly and a yearly recurring price. Put the price IDs in `STRIPE_PRICE_PRO_MONTHLY` and `STRIPE_PRICE_PRO_YEARLY`.
-2. Add a webhook endpoint at `https://your-domain/api/billing/webhook` for `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated` and `customer.subscription.deleted`. Put its signing secret in `STRIPE_WEBHOOK_SECRET`.
-3. Enable the [customer portal](https://docs.stripe.com/customer-management) so people can cancel or change cards.
-4. Set `STRIPE_SECRET_KEY` and `NEXT_PUBLIC_BILLING_ENABLED=true`.
-
-Locally you can forward webhooks with `stripe listen --forward-to localhost:3000/api/billing/webhook` ([Stripe CLI](https://docs.stripe.com/stripe-cli)).
-
-The flow: _Upgrade_ → `POST /api/billing/checkout` creates a Checkout Session for the signed-in user → Stripe calls the webhook → the webhook sets `profiles.plan = 'pro'` with the service role → the app reads the plan and unlocks Pro (and the database starts accepting sync writes).
-
-### 3. Deploy
-
-Any Node host works ([Next.js deploying guide](https://nextjs.org/docs/app/getting-started/deploying)). On Vercel: import the repository, add the environment variables, deploy. Remember to update `NEXT_PUBLIC_SITE_URL` and the Supabase redirect URL to the production domain.
+The payment flow: _Upgrade_ → `POST /api/billing/checkout` creates a Checkout Session for the signed-in user → Stripe calls `/api/billing/webhook` → the webhook sets `profiles.plan = 'pro'` → the app unlocks Pro and the database starts accepting sync writes.
 
 ## How it's built
 
@@ -116,6 +104,7 @@ src/
 ├─ app/                     Routes. Thin: each page renders a module view.
 │  ├─ (app)/                Everything inside the app shell (nav, dialogs)
 │  ├─ api/billing/          Stripe checkout, portal, webhook
+│  ├─ api/admin/            Admin-only: members and Pro gifts
 │  └─ auth/callback/        Supabase sign-in callback
 ├─ core/                    Shared platform pieces, no module knowledge
 │  ├─ data/                 Collections, documents, the shared timeline, sync, backup
@@ -130,6 +119,7 @@ src/
 │  ├─ focus/                Timer engine, tasks, faces, sounds, settings
 │  ├─ insights/             Pure analytics functions, sample data, charts
 │  ├─ account/              Sign-in and account pages
+│  ├─ admin/                Owner-only members page (gift Pro)
 │  ├─ wellness/             Manifest only (coming soon)
 │  └─ fitness/              Manifest only (coming soon)
 └─ proxy.ts                 Refreshes auth cookies (Next 16's renamed middleware)

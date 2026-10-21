@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GearSix, UserCircle, Sparkle } from "@phosphor-icons/react";
+import { GearSix, UserCircle, Sparkle, ShieldCheck } from "@phosphor-icons/react";
 import { MODULES } from "@/modules/registry";
 import { Logo } from "../ui/Logo";
 import { IconButton } from "../ui/Button";
@@ -86,8 +86,37 @@ function PlanButton() {
 
 function AccountButton() {
   const user = useAuth((s) => s.user);
+  const status = useAuth((s) => s.status);
+  const isAdmin = useAuth((s) => s.isAdmin);
   const plan = usePlan();
   const initial = user?.email?.[0]?.toUpperCase();
+  if (status === "signedOut")
+    return (
+      <Link
+        href="/login"
+        className="inline-flex h-10 items-center rounded-full bg-ink px-4 text-sm font-semibold text-page transition-opacity hover:opacity-90"
+      >
+        Sign in
+      </Link>
+    );
+  return (
+    <>
+      {isAdmin && (
+        <Link
+          href="/admin"
+          aria-label="Admin"
+          title="Admin"
+          className="grid size-10 place-items-center rounded-full text-ink-2 transition-colors hover:bg-fill hover:text-ink"
+        >
+          <ShieldCheck size={20} weight="bold" />
+        </Link>
+      )}
+      <AccountLink initial={initial} plan={plan} />
+    </>
+  );
+}
+
+function AccountLink({ initial, plan }: { initial?: string; plan: string }) {
   return (
     <Link
       href="/account"
