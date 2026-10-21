@@ -1,0 +1,309 @@
+@import "tailwindcss";
+
+/* Dark variant follows the resolved appearance on <html data-theme>. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ───────────────────────── Tokens ─────────────────────────
+   Components only use the --c-* roles below. The focus page
+   swaps them for the active theme and timer mode, so every
+   component recolours without knowing about themes. */
+
+:root {
+  --c-page: #f3f0ea;
+  --c-surface: #fbfaf7;
+  --c-raised: #ffffff;
+  --c-ink: #16140f;
+  --c-ink-2: #55514a;
+  --c-ink-3: #8a857b;
+  --c-line: #e2ddd3;
+  --c-fill: rgb(22 20 15 / 0.05);
+  --c-accent: oklch(0.6 0.16 35);
+  --c-glow: oklch(0.9 0.06 45);
+  --c-btn: #16140f;
+  --c-btn-ink: #fbfaf7;
+  --c-btn-shadow: #000000;
+  --c-good: #006300;
+  --c-bad: #c23a3a;
+
+  /* Categorical slots for activities (validated, fixed order). */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #6250d6;
+  --series-8: #e34948;
+
+  /* Single-hue sequential ramp for heatmaps. */
+  --seq: oklch(0.58 0.15 38);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"],
+.neutral-dark {
+  --c-page: #0e0d0b;
+  --c-surface: #181715;
+  --c-raised: #211f1c;
+  --c-ink: #f2efe8;
+  --c-ink-2: #bdb8ad;
+  --c-ink-3: #858075;
+  --c-line: #2c2a26;
+  --c-fill: rgb(242 239 232 / 0.06);
+  --c-accent: oklch(0.72 0.15 42);
+  --c-glow: oklch(0.36 0.09 38);
+  --c-btn: #f2efe8;
+  --c-btn-ink: #16140f;
+  --c-btn-shadow: #000000;
+  --c-good: #3fbf5a;
+  --c-bad: #e66767;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+
+  --seq: oklch(0.7 0.15 42);
+
+  color-scheme: dark;
+}
+
+/* Panels that must stay readable on top of coloured mode backgrounds
+   (dialogs, menus) reset to the neutral palette. */
+.neutral {
+  --c-page: #f3f0ea;
+  --c-surface: #fbfaf7;
+  --c-raised: #ffffff;
+  --c-ink: #16140f;
+  --c-ink-2: #55514a;
+  --c-ink-3: #8a857b;
+  --c-line: #e2ddd3;
+  --c-fill: rgb(22 20 15 / 0.05);
+  --c-accent: oklch(0.6 0.16 35);
+  --c-btn: #16140f;
+  --c-btn-ink: #fbfaf7;
+  color-scheme: light;
+  color: var(--c-ink);
+}
+
+:root[data-theme="dark"] .neutral {
+  --c-page: #0e0d0b;
+  --c-surface: #181715;
+  --c-raised: #211f1c;
+  --c-ink: #f2efe8;
+  --c-ink-2: #bdb8ad;
+  --c-ink-3: #858075;
+  --c-line: #2c2a26;
+  --c-fill: rgb(242 239 232 / 0.06);
+  --c-accent: oklch(0.72 0.15 42);
+  --c-btn: #f2efe8;
+  --c-btn-ink: #16140f;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-page: var(--c-page);
+  --color-surface: var(--c-surface);
+  --color-raised: var(--c-raised);
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-ink-3: var(--c-ink-3);
+  --color-line: var(--c-line);
+  --color-fill: var(--c-fill);
+  --color-accent: var(--c-accent);
+  --color-glow: var(--c-glow);
+  --color-btn: var(--c-btn);
+  --color-btn-ink: var(--c-btn-ink);
+  --color-good: var(--c-good);
+  --color-bad: var(--c-bad);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--c-page);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  min-height: 100svh;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--c-ink) 22%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-ink);
+  outline-offset: 3px;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--c-ink) 22%, transparent) transparent;
+}
+
+/* ───────────────────────── Type ───────────────────────── */
+
+.display {
+  font-family: var(--font-display);
+  font-stretch: 88%;
+  font-variation-settings: "wdth" 88;
+  letter-spacing: -0.025em;
+  font-weight: 650;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 500;
+}
+
+.timer-digits {
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-stretch: 75%;
+  font-variation-settings: "wdth" 75;
+  letter-spacing: -0.02em;
+  line-height: 0.82;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────────────────────── Texture ───────────────────────── */
+
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1.4 -0.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ───────────────────────── Motion ───────────────────────── */
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 5.5s ease-in-out infinite;
+}
+.animate-rise {
+  animation: rise-in 0.42s var(--ease-out-soft) both;
+}
+.animate-fade {
+  animation: fade-in 0.3s ease both;
+}
+
+dialog::backdrop {
+  background: rgb(10 9 8 / 0.42);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.25s ease both;
+}
+
+dialog[open] {
+  animation: rise-in 0.36s var(--ease-out-soft) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
