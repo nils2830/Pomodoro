@@ -8,7 +8,7 @@ import "@fontsource-variable/atkinson-hyperlegible-next";
 import "./globals.css";
 import { BOOT_SCRIPT } from "@/core/shell/useAppearance";
 
-const description = "A calm focus timer with an evidence-based warm-up, a clock you can hide, and honest insights into how often you actually sit down to work.";
+const description = "A calm focus timer with a warm-up ritual, a clock you can hide, and honest insights into how often you actually sit down to work.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
