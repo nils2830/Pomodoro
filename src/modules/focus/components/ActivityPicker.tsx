@@ -4,6 +4,7 @@ import { CaretDown, Check, GearSix } from "@phosphor-icons/react";
 import { Popover, MenuItem, MenuSeparator } from "@/core/ui/Popover";
 import { useUI } from "@/core/ui/store";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import { useTimer } from "../store/timer";
 import { useActivityList } from "../hooks";
 
@@ -14,6 +15,7 @@ export function ActivityDot({ color, className }: { color: number; className?: s
 }
 
 export function ActivityPicker() {
+  const t = useT();
   const activityId = useTimer((s) => s.activityId);
   const setActivity = useTimer((s) => s.setActivity);
   const openSettings = useUI((s) => s.openSettings);
@@ -28,17 +30,17 @@ export function ActivityPicker() {
           type="button"
           {...props}
           className="inline-flex h-9 items-center gap-2 rounded-full bg-fill pr-3 pl-3.5 text-sm font-medium transition-colors hover:bg-ink/14"
-          title="What kind of work is this?"
+          title={t("What kind of work is this?")}
         >
           {current && <ActivityDot color={current.color} />}
-          {current?.name ?? "Choose activity"}
+          {current?.name ?? t("Choose activity")}
           <CaretDown size={12} weight="bold" className="text-ink-3" />
         </button>
       )}
     >
       {(close) => (
         <>
-          <div className="eyebrow px-3 pt-2 pb-2 text-ink-3">Logging time to</div>
+          <div className="eyebrow px-3 pt-2 pb-2 text-ink-3">{t("Logging time to")}</div>
           {list.map((a) => (
             <MenuItem
               key={a.id}
@@ -60,7 +62,7 @@ export function ActivityPicker() {
               openSettings("activities");
             }}
           >
-            Manage activities
+            {t("Manage activities")}
           </MenuItem>
         </>
       )}

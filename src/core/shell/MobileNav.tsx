@@ -4,13 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MODULES } from "@/modules/registry";
 import { cn } from "../lib/cn";
+import { useT } from "../i18n";
 import { isActive } from "./TopBar";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const t = useT();
   return (
     <nav
-      aria-label="Modules"
+      aria-label={t("Modules")}
       className="fixed inset-x-3 bottom-3 z-30 flex items-center justify-around rounded-full bg-ink/92 p-1.5 text-page shadow-[0_12px_40px_-12px_rgb(0_0_0/0.5)] backdrop-blur md:hidden"
     >
       {MODULES.map((m) => {
@@ -27,7 +29,7 @@ export function MobileNav() {
             )}
           >
             <Icon size={19} weight={active ? "fill" : "bold"} />
-            {m.name}
+            {t(m.name)}
           </Link>
         );
       })}

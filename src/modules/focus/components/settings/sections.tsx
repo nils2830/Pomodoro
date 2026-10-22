@@ -12,6 +12,7 @@ import { useGate } from "@/core/billing/useGate";
 import { usePrefs } from "@/core/prefs";
 import { notificationPermission, requestNotifications } from "@/core/lib/notify";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import { useFocusSettings } from "../../store/settings";
 import { ALARMS, AMBIENTS, playAlarm, previewAmbient, unlockAudio } from "../../audio/synth";
 import { FaceList } from "../FacePicker";
@@ -25,39 +26,50 @@ function useSettings() {
 }
 
 export function TimerSection() {
+  const t = useT();
   const [s, set] = useSettings();
   const setDuration = (key: keyof typeof s.durations, v: number) => set({ durations: { ...s.durations, [key]: v } });
   return (
     <>
-      <SectionTitle eyebrow="Timer" title="Rhythm">
-        The classic is 25 minutes on, 5 off, and a longer break after four rounds. Tune it to how long you can actually stay with something.
+      <SectionTitle eyebrow={t("Timer")} title={t("Rhythm")}>
+        {t("The classic is 25 minutes on, 5 off, and a longer break after four rounds. Tune it to how long you can actually stay with something.")}
       </SectionTitle>
-      <Group title="Lengths">
-        <Field label="Focus">
-          <NumberField label="Focus minutes" value={s.durations.focus} onChange={(v) => setDuration("focus", v)} min={1} max={240} suffix="min" />
+      <Group title={t("Lengths")}>
+        <Field label={t("Focus")}>
+          <NumberField label={t("Focus minutes")} value={s.durations.focus} onChange={(v) => setDuration("focus", v)} min={1} max={240} suffix="min" />
         </Field>
-        <Field label="Short break">
-          <NumberField label="Short break minutes" value={s.durations.short} onChange={(v) => setDuration("short", v)} min={1} max={60} suffix="min" />
+        <Field label={t("Short break")}>
+          <NumberField label={t("Short break minutes")} value={s.durations.short} onChange={(v) => setDuration("short", v)} min={1} max={60} suffix="min" />
         </Field>
-        <Field label="Long break">
-          <NumberField label="Long break minutes" value={s.durations.long} onChange={(v) => setDuration("long", v)} min={1} max={120} suffix="min" />
+        <Field label={t("Long break")}>
+          <NumberField label={t("Long break minutes")} value={s.durations.long} onChange={(v) => setDuration("long", v)} min={1} max={120} suffix="min" />
         </Field>
-        <Field label="Long break every" hint="Number of focus sessions before a long break.">
-          <NumberField label="Long break interval" value={s.longBreakInterval} onChange={(v) => set({ longBreakInterval: v })} min={1} max={12} />
+        <Field label={t("Long break every")} hint={t("Number of focus sessions before a long break.")}>
+          <NumberField label={t("Long break interval")} value={s.longBreakInterval} onChange={(v) => set({ longBreakInterval: v })} min={1} max={12} />
         </Field>
       </Group>
-      <Group title="Flow">
-        <Field label="Start breaks automatically">
-          <Switch label="Start breaks automatically" checked={s.autoStartBreaks} onChange={(v) => set({ autoStartBreaks: v })} />
+      <Group title={t("Flow")}>
+        <Field label={t("Start breaks automatically")}>
+          <Switch label={t("Start breaks automatically")} checked={s.autoStartBreaks} onChange={(v) => set({ autoStartBreaks: v })} />
         </Field>
-        <Field label="Start focus automatically" hint="After a break ends.">
-          <Switch label="Start focus automatically" checked={s.autoStartFocus} onChange={(v) => set({ autoStartFocus: v })} />
+        <Field label={t("Start focus automatically")} hint={t("After a break ends.")}>
+          <Switch label={t("Start focus automatically")} checked={s.autoStartFocus} onChange={(v) => set({ autoStartFocus: v })} />
         </Field>
         <Field
-          label="Daily goal"
-          hint="Shown as a ring in the top bar; 0 hides it. Habits form fastest around a small target you can hit on most days, so start with one session and raise it once it feels easy (Lally et al. 2010)."
+          label={t("Daily goal")}
+          hint={t(
+            "Shown as a ring in the top bar; 0 hides it. Habits form fastest around a small target you can hit on most days, so start with one session and raise it once it feels easy (Lally et al. 2010).",
+          )}
         >
-          <NumberField label="Daily goal minutes" value={s.goalMinutes} onChange={(v) => set({ goalMinutes: v })} min={0} max={480} step={5} suffix="min" />
+          <NumberField
+            label={t("Daily goal minutes")}
+            value={s.goalMinutes}
+            onChange={(v) => set({ goalMinutes: v })}
+            min={0}
+            max={480}
+            step={5}
+            suffix="min"
+          />
         </Field>
       </Group>
     </>
@@ -65,16 +77,17 @@ export function TimerSection() {
 }
 
 export function TasksSection() {
+  const t = useT();
   const [s, set] = useSettings();
   return (
     <>
-      <SectionTitle eyebrow="Tasks" title="Task behaviour" />
+      <SectionTitle eyebrow={t("Tasks")} title={t("Task behaviour")} />
       <Group>
-        <Field label="Tick off tasks automatically" hint="When completed sessions reach the estimate.">
-          <Switch label="Tick off tasks automatically" checked={s.autoCheckTasks} onChange={(v) => set({ autoCheckTasks: v })} />
+        <Field label={t("Tick off tasks automatically")} hint={t("When completed sessions reach the estimate.")}>
+          <Switch label={t("Tick off tasks automatically")} checked={s.autoCheckTasks} onChange={(v) => set({ autoCheckTasks: v })} />
         </Field>
-        <Field label="Move to the next task" hint="When the active task is ticked off.">
-          <Switch label="Move to the next task" checked={s.autoSwitchTasks} onChange={(v) => set({ autoSwitchTasks: v })} />
+        <Field label={t("Move to the next task")} hint={t("When the active task is ticked off.")}>
+          <Switch label={t("Move to the next task")} checked={s.autoSwitchTasks} onChange={(v) => set({ autoSwitchTasks: v })} />
         </Field>
       </Group>
     </>
@@ -96,6 +109,7 @@ function Range({ value, onChange, label }: { value: number; onChange: (v: number
 }
 
 export function SoundSection() {
+  const t = useT();
   const [s, set] = useSettings();
   const canSounds = useCan("sounds.all");
   const gate = useGate();
@@ -124,10 +138,10 @@ export function SoundSection() {
 
   return (
     <>
-      <SectionTitle eyebrow="Sound" title="Alarms & ambience">
-        Everything is synthesised in your browser, so nothing needs to download.
+      <SectionTitle eyebrow={t("Sound")} title={t("Alarms & ambience")}>
+        {t("Everything is synthesised in your browser, so nothing needs to download.")}
       </SectionTitle>
-      <Group title="Alarm">
+      <Group title={t("Alarm")}>
         <div className="grid grid-cols-2 gap-2 py-4 sm:grid-cols-3">
           {ALARMS.map((a) => {
             const active = s.alarm === a.id;
@@ -142,7 +156,7 @@ export function SoundSection() {
                   active ? "bg-ink text-page" : "bg-fill hover:bg-ink/10",
                 )}
               >
-                {a.name}
+                {t(a.name)}
                 {active ? (
                   <Check size={15} weight="bold" />
                 ) : locked ? (
@@ -154,14 +168,14 @@ export function SoundSection() {
             );
           })}
         </div>
-        <Field label="Volume">
-          <Range label="Alarm volume" value={s.alarmVolume} onChange={(v) => set({ alarmVolume: v })} />
+        <Field label={t("Volume")}>
+          <Range label={t("Alarm volume")} value={s.alarmVolume} onChange={(v) => set({ alarmVolume: v })} />
         </Field>
-        <Field label="Repeat">
-          <NumberField label="Alarm repeat" value={s.alarmRepeat} onChange={(v) => set({ alarmRepeat: v })} min={1} max={5} suffix="×" />
+        <Field label={t("Repeat")}>
+          <NumberField label={t("Alarm repeat")} value={s.alarmRepeat} onChange={(v) => set({ alarmRepeat: v })} min={1} max={5} suffix="×" />
         </Field>
       </Group>
-      <Group title="Ambient sound while focusing">
+      <Group title={t("Ambient sound while focusing")}>
         <div className="grid grid-cols-2 gap-2 py-4 sm:grid-cols-4">
           {AMBIENTS.map((a) => {
             const active = s.ambient === a.id;
@@ -176,17 +190,17 @@ export function SoundSection() {
                   active ? "bg-ink text-page" : "bg-fill hover:bg-ink/10",
                 )}
               >
-                {a.name}
+                {t(a.name)}
                 {active ? <Check size={14} weight="bold" /> : locked ? <LockSimple size={12} weight="bold" className="shrink-0 text-ink-3" /> : null}
               </button>
             );
           })}
         </div>
-        <Field label="Volume">
-          <Range label="Ambient volume" value={s.ambientVolume} onChange={(v) => set({ ambientVolume: v })} />
+        <Field label={t("Volume")}>
+          <Range label={t("Ambient volume")} value={s.ambientVolume} onChange={(v) => set({ ambientVolume: v })} />
         </Field>
-        <Field label="Keep playing during breaks">
-          <Switch label="Ambient during breaks" checked={s.ambientInBreaks} onChange={(v) => set({ ambientInBreaks: v })} />
+        <Field label={t("Keep playing during breaks")}>
+          <Switch label={t("Ambient during breaks")} checked={s.ambientInBreaks} onChange={(v) => set({ ambientInBreaks: v })} />
         </Field>
       </Group>
     </>
@@ -194,30 +208,31 @@ export function SoundSection() {
 }
 
 export function DisplaySection() {
+  const t = useT();
   const [s, set] = useSettings();
   const prefs = usePrefs((p) => p.doc);
   const setPrefs = usePrefs((p) => p.set);
   return (
     <>
-      <SectionTitle eyebrow="Faces" title="How time looks">
-        Faces marked “no ticker” never count seconds. To hide the timer completely, press H or use the eye button above it.
+      <SectionTitle eyebrow={t("Faces")} title={t("How time looks")}>
+        {t("Faces marked “no ticker” never count seconds. To hide the timer completely, press H or use the eye button above it.")}
       </SectionTitle>
-      <Group title="Face">
+      <Group title={t("Face")}>
         <div className="py-2">
           <FaceList />
         </div>
       </Group>
-      <Group title="Details">
-        <Field label="Show seconds" hint="Digits face only.">
-          <Switch label="Show seconds" checked={s.showSeconds} onChange={(v) => set({ showSeconds: v })} />
+      <Group title={t("Details")}>
+        <Field label={t("Show seconds")} hint={t("Digits face only.")}>
+          <Switch label={t("Show seconds")} checked={s.showSeconds} onChange={(v) => set({ showSeconds: v })} />
         </Field>
-        <Field label="Time in tab title">
-          <Switch label="Time in tab title" checked={s.timeInTitle} onChange={(v) => set({ timeInTitle: v })} />
+        <Field label={t("Time in tab title")}>
+          <Switch label={t("Time in tab title")} checked={s.timeInTitle} onChange={(v) => set({ timeInTitle: v })} />
         </Field>
-        <Field label="Clock format">
+        <Field label={t("Clock format")}>
           <Segmented
             size="sm"
-            ariaLabel="Clock format"
+            ariaLabel={t("Clock format")}
             value={prefs.hourFormat}
             onChange={(v) => setPrefs({ hourFormat: v })}
             options={[
@@ -226,15 +241,15 @@ export function DisplaySection() {
             ]}
           />
         </Field>
-        <Field label="Week starts on">
+        <Field label={t("Week starts on")}>
           <Segmented
             size="sm"
-            ariaLabel="Week starts on"
+            ariaLabel={t("Week starts on")}
             value={String(prefs.weekStart) as "1" | "0"}
             onChange={(v) => setPrefs({ weekStart: v === "1" ? 1 : 0 })}
             options={[
-              { value: "1", label: "Monday" },
-              { value: "0", label: "Sunday" },
+              { value: "1", label: t("Monday") },
+              { value: "0", label: t("Sunday") },
             ]}
           />
         </Field>
@@ -244,30 +259,31 @@ export function DisplaySection() {
 }
 
 export function NotificationsSection() {
+  const t = useT();
   const [s, set] = useSettings();
   const [perm, setPerm] = useState<string>("default");
   useEffect(() => setPerm(notificationPermission()), []);
 
   return (
     <>
-      <SectionTitle eyebrow="Alerts" title="Notifications">
-        Desktop notifications reach you when Steen is in a background tab.
+      <SectionTitle eyebrow={t("Alerts")} title={t("Notifications")}>
+        {t("Desktop notifications reach you when Steen is in a background tab.")}
       </SectionTitle>
       <Group>
         <Field
-          label="Desktop notifications"
+          label={t("Desktop notifications")}
           hint={
             perm === "denied"
-              ? "Blocked in your browser's site settings."
+              ? t("Blocked in your browser's site settings.")
               : perm === "unsupported"
-                ? "Not supported in this browser."
+                ? t("Not supported in this browser.")
                 : perm === "granted"
-                  ? "Allowed."
-                  : "Your browser will ask for permission."
+                  ? t("Allowed.")
+                  : t("Your browser will ask for permission.")
           }
         >
           <Switch
-            label="Desktop notifications"
+            label={t("Desktop notifications")}
             checked={s.notifications && perm === "granted"}
             disabled={perm === "denied" || perm === "unsupported"}
             onChange={async (v) => {
@@ -279,12 +295,12 @@ export function NotificationsSection() {
             }}
           />
         </Field>
-        <Field label="Heads-up before the end" hint="A quiet notification a few minutes before a session ends.">
+        <Field label={t("Heads-up before the end")} hint={t("A quiet notification a few minutes before a session ends.")}>
           <Select value={s.reminderMinutes} onChange={(e) => set({ reminderMinutes: Number(e.target.value) })}>
-            <option value={0}>Off</option>
+            <option value={0}>{t("Off")}</option>
             {[1, 2, 3, 5, 10].map((m) => (
               <option key={m} value={m}>
-                {m} min before
+                {t("{m} min before", { m })}
               </option>
             ))}
           </Select>
@@ -300,7 +316,7 @@ export function NotificationsSection() {
             playAlarm(s.alarm, s.alarmVolume, 1);
           }}
         >
-          Test alarm sound
+          {t("Test alarm sound")}
         </Button>
       </div>
     </>

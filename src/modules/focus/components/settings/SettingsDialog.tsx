@@ -5,6 +5,7 @@ import { Bell, CheckSquare, Database, Eye, Palette, SpeakerHigh, Swatches, Timer
 import { Dialog } from "@/core/ui/Dialog";
 import { useUI, type SettingsTab } from "@/core/ui/store";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import { TimerSection, TasksSection, SoundSection, DisplaySection, NotificationsSection } from "./sections";
 import { WarmupSection } from "./WarmupSection";
 import { AppearanceSection } from "./AppearanceSection";
@@ -39,6 +40,7 @@ const SECTIONS: Record<SettingsTab, () => ReactNode> = {
 };
 
 export function SettingsDialog() {
+  const t = useT();
   const { open, tab } = useUI((s) => s.settings);
   const close = useUI((s) => s.closeSettings);
   const openTab = useUI((s) => s.openSettings);
@@ -47,21 +49,21 @@ export function SettingsDialog() {
   return (
     <Dialog open={open} onClose={close} size="lg" bare>
       <div className="grid min-h-[min(640px,calc(100svh-32px))] md:grid-cols-[200px_1fr]">
-        <nav aria-label="Settings sections" className="flex gap-1 overflow-x-auto border-b border-line p-3 md:flex-col md:border-r md:border-b-0 md:p-4">
-          <div className="display hidden px-3 pt-2 pb-5 text-[26px] leading-none md:block">Settings</div>
-          {TABS.map((t) => (
+        <nav aria-label={t("Settings sections")} className="flex gap-1 overflow-x-auto border-b border-line p-3 md:flex-col md:border-r md:border-b-0 md:p-4">
+          <div className="display hidden px-3 pt-2 pb-5 text-[26px] leading-none md:block">{t("Settings")}</div>
+          {TABS.map((item) => (
             <button
-              key={t.id}
+              key={item.id}
               type="button"
-              onClick={() => openTab(t.id)}
-              aria-current={t.id === tab ? "page" : undefined}
+              onClick={() => openTab(item.id)}
+              aria-current={item.id === tab ? "page" : undefined}
               className={cn(
                 "flex shrink-0 items-center gap-2.5 rounded-full px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors",
-                t.id === tab ? "bg-ink text-page" : "text-ink-2 hover:bg-fill hover:text-ink",
+                item.id === tab ? "bg-ink text-page" : "text-ink-2 hover:bg-fill hover:text-ink",
               )}
             >
-              {t.icon}
-              {t.label}
+              {item.icon}
+              {t(item.label)}
             </button>
           ))}
         </nav>
@@ -71,7 +73,7 @@ export function SettingsDialog() {
             onClick={close}
             className="absolute top-5 right-5 rounded-full px-3 py-1.5 text-sm font-medium text-ink-3 hover:bg-fill hover:text-ink"
           >
-            Done
+            {t("Done")}
           </button>
           <Section />
         </div>

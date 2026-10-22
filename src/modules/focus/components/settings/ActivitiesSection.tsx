@@ -11,12 +11,14 @@ import { useCan, useLimits } from "@/core/billing/entitlements";
 import { useGate } from "@/core/billing/useGate";
 import { SERIES_NAMES } from "@/core/theme/themes";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import { useActivities, useProjects, nextColorSlot } from "../../store/data";
 import { useTimer } from "../../store/timer";
 import { useActivityList, useProjectList } from "../../hooks";
 import { Group, SectionTitle } from "./SettingsDialog";
 
 function ColorPicker({ value, onChange }: { value: number; onChange: (c: number) => void }) {
+  const t = useT();
   return (
     <Popover
       align="start"
@@ -25,7 +27,7 @@ function ColorPicker({ value, onChange }: { value: number; onChange: (c: number)
         <button
           type="button"
           {...props}
-          aria-label={`Colour: ${SERIES_NAMES[value]}`}
+          aria-label={t("Colour: {name}", { name: t(SERIES_NAMES[value]) })}
           className="grid size-9 shrink-0 place-items-center rounded-full hover:bg-fill"
         >
           <span className="size-4 rounded-full" style={{ background: `var(--series-${value + 1})` }} />
@@ -38,8 +40,8 @@ function ColorPicker({ value, onChange }: { value: number; onChange: (c: number)
             <button
               key={name}
               type="button"
-              aria-label={name}
-              title={name}
+              aria-label={t(name)}
+              title={t(name)}
               onClick={() => {
                 onChange(i);
                 close();
@@ -56,6 +58,7 @@ function ColorPicker({ value, onChange }: { value: number; onChange: (c: number)
 }
 
 function NameInput({ value, onCommit }: { value: string; onCommit: (v: string) => void }) {
+  const t = useT();
   const [draft, setDraft] = useState(value);
   return (
     <input
@@ -63,13 +66,14 @@ function NameInput({ value, onCommit }: { value: string; onCommit: (v: string) =
       onChange={(e) => setDraft(e.target.value)}
       onBlur={() => (draft.trim() ? draft.trim() !== value && onCommit(draft.trim()) : setDraft(value))}
       onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-      aria-label="Name"
+      aria-label={t("Name")}
       className="h-9 min-w-0 flex-1 rounded-xl bg-transparent px-2 text-[15px] font-medium outline-none hover:bg-fill focus:bg-fill"
     />
   );
 }
 
 export function ActivitiesSection() {
+  const t = useT();
   const activities = useActivityList();
   const projects = useProjectList();
   const limits = useLimits();
@@ -105,9 +109,9 @@ export function ActivitiesSection() {
 
   return (
     <>
-      <SectionTitle eyebrow="Activities" title="What you spend time on">
-        Every focus session is logged to an activity. Insights uses them to show how often you sit down for each kind of work.
-        {Number.isFinite(limits.activities) && ` Free includes ${limits.activities}.`}
+      <SectionTitle eyebrow={t("Activities")} title={t("What you spend time on")}>
+        {t("Every focus session is logged to an activity. Insights uses them to show how often you sit down for each kind of work.")}
+        {Number.isFinite(limits.activities) && ` ${t("Free includes {n}.", { n: limits.activities })}`}
       </SectionTitle>
       <Group>
         {activities.map((a) => (
@@ -116,14 +120,14 @@ export function ActivitiesSection() {
             <NameInput value={a.name} onCommit={(v) => useActivities.getState().update(a.id, { name: v })} />
             <button
               type="button"
-              aria-label={`Archive ${a.name}`}
-              title="Archive (keeps its history)"
+              aria-label={t("Archive {name}", { name: a.name })}
+              title={t("Archive (keeps its history)")}
               disabled={activities.length <= 1}
               onClick={async () => {
                 const ok = await confirmAction({
-                  title: `Archive “${a.name}”?`,
-                  body: "It disappears from pickers, but its logged time stays in Insights.",
-                  confirmLabel: "Archive",
+                  title: t("Archive “{name}”?", { name: a.name }),
+                  body: t("It disappears from pickers, but its logged time stays in Insights."),
+                  confirmLabel: t("Archive"),
                 });
                 if (!ok) return;
                 useActivities.getState().update(a.id, { archived: true });
@@ -145,19 +149,19 @@ export function ActivitiesSection() {
           <TextInput
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="New activity, e.g. Coding, Language, Music"
+            placeholder={t("New activity, e.g. Coding, Language, Music")}
             className="h-10"
-            aria-label="New activity"
+            aria-label={t("New activity")}
           />
           <Button type="submit" variant="primary" size="md" icon={<Plus size={14} weight="bold" />} disabled={!name.trim()}>
-            Add
+            {t("Add")}
           </Button>
         </form>
       </Group>
 
       <div className="mt-10">
-        <SectionTitle eyebrow="Projects" title="Group tasks">
-          Attach tasks to a project, like a course or a deadline. {!canProjects && <ProBadge className="ml-1 align-middle" />}
+        <SectionTitle eyebrow={t("Projects")} title={t("Group tasks")}>
+          {t("Attach tasks to a project, like a course or a deadline.")} {!canProjects && <ProBadge className="ml-1 align-middle" />}
         </SectionTitle>
         <Group>
           {projects.map((p) => (
@@ -166,7 +170,7 @@ export function ActivitiesSection() {
               <NameInput value={p.name} onCommit={(v) => useProjects.getState().update(p.id, { name: v })} />
               <button
                 type="button"
-                aria-label={`Delete ${p.name}`}
+                aria-label={t("Delete {name}", { name: p.name })}
                 onClick={() => useProjects.getState().remove(p.id)}
                 className="grid size-9 place-items-center rounded-full text-ink-3 hover:bg-fill hover:text-bad"
               >
@@ -184,12 +188,12 @@ export function ActivitiesSection() {
             <TextInput
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="New project, e.g. Thesis"
+              placeholder={t("New project, e.g. Thesis")}
               className="h-10"
-              aria-label="New project"
+              aria-label={t("New project")}
             />
             <Button type="submit" variant="primary" icon={<Plus size={14} weight="bold" />} disabled={!projectName.trim()}>
-              Add
+              {t("Add")}
             </Button>
           </form>
         </Group>

@@ -1,6 +1,7 @@
 "use client";
 
 import { getSyncables, type BaseRecord } from "./record";
+import { t } from "../i18n";
 
 interface Backup {
   app: "steen" | "cadence";
@@ -20,7 +21,7 @@ export function createBackup(): string {
 /** Merges a backup into local data (newest version of each record wins). */
 export function restoreBackup(json: string): number {
   const parsed = JSON.parse(json) as Partial<Backup>;
-  if ((parsed.app !== "steen" && parsed.app !== "cadence") || !parsed.collections) throw new Error("This file isn't a Steen backup.");
+  if ((parsed.app !== "steen" && parsed.app !== "cadence") || !parsed.collections) throw new Error(t("This file isn't a Steen backup."));
   let count = 0;
   for (const s of getSyncables()) {
     const records = parsed.collections[s.name];

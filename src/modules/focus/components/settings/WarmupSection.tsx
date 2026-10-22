@@ -8,12 +8,14 @@ import { Segmented } from "@/core/ui/Segmented";
 import { Button } from "@/core/ui/Button";
 import { useUI } from "@/core/ui/store";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import { useFocusSettings } from "../../store/settings";
 import { useWarmup } from "../../warmup/store";
 import { WARMUP_EXPLAINER, WARMUP_PRESETS, WARMUP_REFERENCES, WARMUP_SAFETY, type WarmupWhen } from "../../warmup/protocol";
 import { Group, SectionTitle } from "./SettingsDialog";
 
 export function WarmupSection() {
+  const t = useT();
   const s = useFocusSettings((x) => x.doc);
   const set = useFocusSettings((x) => x.set);
   const closeSettings = useUI((x) => x.closeSettings);
@@ -22,33 +24,33 @@ export function WarmupSection() {
 
   return (
     <>
-      <SectionTitle eyebrow="Warm-up" title="Settle before you start">
-        A minute or two resting your eyes on a single dot, then a moment with them closed. A calm, consistent way into a session.
+      <SectionTitle eyebrow={t("Warm-up")} title={t("Settle before you start")}>
+        {t("A minute or two resting your eyes on a single dot, then a moment with them closed. A calm, consistent way into a session.")}
       </SectionTitle>
 
-      <Group title="When">
+      <Group title={t("When")}>
         <div className="py-3.5">
           <Segmented<WarmupWhen>
-            ariaLabel="When to warm up"
+            ariaLabel={t("When to warm up")}
             value={s.warmupWhen}
             onChange={(v) => set({ warmupWhen: v })}
             options={[
-              { value: "sitdown", label: "New sit-down" },
-              { value: "always", label: "Every session" },
-              { value: "off", label: "Off" },
+              { value: "sitdown", label: t("New sit-down") },
+              { value: "always", label: t("Every session") },
+              { value: "off", label: t("Off") },
             ]}
           />
           <p className="mt-2.5 text-[13px] leading-snug text-ink-3">
             {s.warmupWhen === "sitdown"
-              ? "Before the first focus session after 20 minutes away. Rounds after a break go straight in."
+              ? t("Before the first focus session after 20 minutes away. Rounds after a break go straight in.")
               : s.warmupWhen === "always"
-                ? "Before every focus session you start yourself. Automatic starts skip it."
-                : "Start goes straight to the timer. You can still try it below."}
+                ? t("Before every focus session you start yourself. Automatic starts skip it.")
+                : t("Start goes straight to the timer. You can still try it below.")}
           </p>
         </div>
       </Group>
 
-      <Group title="Length">
+      <Group title={t("Length")}>
         <div className="grid grid-cols-5 gap-1.5 pt-4">
           {WARMUP_PRESETS.map((p) => {
             const active = p.seconds === s.warmupSeconds;
@@ -64,23 +66,23 @@ export function WarmupSection() {
                 )}
               >
                 <span className="text-[15px] font-semibold tabular-nums">{p.label}</span>
-                <span className={cn("text-[11.5px]", active ? "opacity-70" : "text-ink-3")}>{p.name}</span>
+                <span className={cn("text-[11.5px]", active ? "opacity-70" : "text-ink-3")}>{t(p.name)}</span>
               </button>
             );
           })}
         </div>
-        <p className="pt-2.5 pb-4 text-[13px] text-ink-3">{preset?.note ?? "Settle, a gaze at the dot, eyes closed, then begin."}</p>
+        <p className="pt-2.5 pb-4 text-[13px] text-ink-3">{t(preset?.note ?? "Settle, a gaze at the dot, eyes closed, then begin.")}</p>
       </Group>
 
-      <Group title="Steps">
-        <Field label="Name your first step" hint="One line before the warm-up, shown again when you open your eyes.">
-          <Switch label="Name your first step" checked={s.warmupFirstStep} onChange={(v) => set({ warmupFirstStep: v })} />
+      <Group title={t("Steps")}>
+        <Field label={t("Name your first step")} hint={t("One line before the warm-up, shown again when you open your eyes.")}>
+          <Switch label={t("Name your first step")} checked={s.warmupFirstStep} onChange={(v) => set({ warmupFirstStep: v })} />
         </Field>
-        <Field label="Eyes closed at the end" hint="A quarter of the time, while the afterglow of the dot fades. Rests your eyes.">
-          <Switch label="Eyes closed at the end" checked={s.warmupEyesClosed} onChange={(v) => set({ warmupEyesClosed: v })} />
+        <Field label={t("Eyes closed at the end")} hint={t("A quarter of the time, while the afterglow of the dot fades. Rests your eyes.")}>
+          <Switch label={t("Eyes closed at the end")} checked={s.warmupEyesClosed} onChange={(v) => set({ warmupEyesClosed: v })} />
         </Field>
-        <Field label="Soft tone" hint="Tells you when to open your eyes.">
-          <Switch label="Soft tone" checked={s.warmupTone} onChange={(v) => set({ warmupTone: v })} />
+        <Field label={t("Soft tone")} hint={t("Tells you when to open your eyes.")}>
+          <Switch label={t("Soft tone")} checked={s.warmupTone} onChange={(v) => set({ warmupTone: v })} />
         </Field>
       </Group>
 
@@ -94,20 +96,25 @@ export function WarmupSection() {
             useWarmup.getState().open({ preview: true });
           }}
         >
-          Try it now
+          {t("Try it now")}
         </Button>
-        <span className="text-[13px] text-ink-3">Nothing starts afterwards.</span>
+        <span className="text-[13px] text-ink-3">{t("Nothing starts afterwards.")}</span>
       </div>
 
       <div className="mt-8 rounded-[22px] bg-fill">
-        <button type="button" onClick={() => setScience((v) => !v)} aria-expanded={science} className="flex w-full items-center justify-between px-5 py-4 text-left">
-          <span className="text-[15px] font-medium">What the research says</span>
+        <button
+          type="button"
+          onClick={() => setScience((v) => !v)}
+          aria-expanded={science}
+          className="flex w-full items-center justify-between px-5 py-4 text-left"
+        >
+          <span className="text-[15px] font-medium">{t("What the research says")}</span>
           <CaretDown size={14} weight="bold" className={cn("text-ink-3 transition-transform", science && "rotate-180")} />
         </button>
         {science && (
           <div className="px-5 pb-5 text-[13.5px] leading-relaxed text-ink-2">
-            <p>{WARMUP_EXPLAINER}</p>
-            <p className="mt-3 text-ink-3">{WARMUP_SAFETY}</p>
+            <p>{t(WARMUP_EXPLAINER)}</p>
+            <p className="mt-3 text-ink-3">{t(WARMUP_SAFETY)}</p>
             <ul className="mt-4 space-y-3 border-t border-line pt-4">
               {WARMUP_REFERENCES.map((r) => (
                 <li key={r.url}>
@@ -115,7 +122,7 @@ export function WarmupSection() {
                     {r.citation}
                     <ArrowSquareOut size={12} weight="bold" className="mt-1 shrink-0 text-ink-3" />
                   </a>
-                  <div className="text-[12.5px] text-ink-3">{r.supports}</div>
+                  <div className="text-[12.5px] text-ink-3">{t(r.supports)}</div>
                 </li>
               ))}
             </ul>

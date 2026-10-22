@@ -6,6 +6,7 @@ import { createRandom } from "@/core/lib/random";
 import { addDays, startOfDay } from "@/core/lib/date";
 import { MINUTE } from "@/core/lib/time";
 import { toast } from "@/core/ui/store";
+import { t } from "@/core/i18n";
 import { useActivities } from "@/modules/focus/store/data";
 
 type NewEntry = Omit<Entry, "id" | "createdAt" | "updatedAt" | "deletedAt">;
@@ -145,7 +146,7 @@ export function loadSampleData(): void {
   }
   const entries = generateSampleEntries();
   useEntries.getState().createMany(entries);
-  toast({ message: `Loaded ${entries.filter((e) => e.kind === "focus").length} sample sessions.`, tone: "success" });
+  toast({ message: t("Loaded {count} sample sessions.", { count: entries.filter((e) => e.kind === "focus").length }), tone: "success" });
 }
 
 export function removeSampleData(): void {
@@ -153,5 +154,5 @@ export function removeSampleData(): void {
   const synced = useAuth.getState().status === "signedIn";
   if (synced) useEntries.getState().removeWhere((e) => e.source === "sample");
   else useEntries.setState((s) => ({ items: Object.fromEntries(Object.entries(s.items).filter(([, e]) => e.source !== "sample")) }));
-  toast("Sample data removed.");
+  toast(t("Sample data removed."));
 }

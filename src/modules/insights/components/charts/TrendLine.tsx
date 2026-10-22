@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { formatDuration, HOUR } from "@/core/lib/time";
-import { formatShortDate } from "@/core/lib/date";
+import { useLocale, useT } from "@/core/i18n";
+import { formatShortDate } from "../../dates";
 import { niceMax, Tooltip, useWidth } from "./shared";
 
 const H = 200;
@@ -10,6 +11,8 @@ const PAD = { top: 16, right: 92, bottom: 28, left: 40 };
 
 /** Weekly focus as one line with a light wash, crosshair on hover. */
 export function TrendLine({ data }: { data: { start: number; totalMs: number }[] }) {
+  const t = useT();
+  const locale = useLocale();
   const [ref, width] = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
   const innerW = Math.max(0, width - PAD.left - PAD.right);
@@ -35,7 +38,7 @@ export function TrendLine({ data }: { data: { start: number; totalMs: number }[]
       onPointerLeave={() => setHover(null)}
     >
       {width > 0 && data.length > 0 && (
-        <svg width={width} height={H} role="img" aria-label="Focus time per week">
+        <svg width={width} height={H} role="img" aria-label={t("Focus time per week")}>
           {[0, maxH / 2, maxH].map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={width - PAD.right} y1={y(t * HOUR)} y2={y(t * HOUR)} stroke="var(--c-line)" />
@@ -49,7 +52,7 @@ export function TrendLine({ data }: { data: { start: number; totalMs: number }[]
           {data.map((d, i) =>
             i % every === 0 ? (
               <text key={d.start} x={x(i)} y={H - 8} textAnchor="middle" fontSize="11" fill="var(--c-ink-3)">
-                {formatShortDate(d.start)}
+                {formatShortDate(locale, d.start)}
               </text>
             ) : null,
           )}
@@ -67,7 +70,7 @@ export function TrendLine({ data }: { data: { start: number; totalMs: number }[]
                 {Date.now() - last.start < 7 * 86_400_000 && (
                   <tspan fill="var(--c-ink-3)" fontWeight={400}>
                     {" "}
-                    so far
+                    {t("so far")}
                   </tspan>
                 )}
               </text>
@@ -78,7 +81,7 @@ export function TrendLine({ data }: { data: { start: number; totalMs: number }[]
       {hover != null && data[hover] && (
         <Tooltip x={x(hover)} y={y(data[hover].totalMs)} width={width}>
           <div className="text-[15px] font-semibold tabular-nums">{formatDuration(data[hover].totalMs)}</div>
-          <div className="text-[12px] text-ink-3">Week of {formatShortDate(data[hover].start)}</div>
+          <div className="text-[12px] text-ink-3">{t("Week of {date}", { date: formatShortDate(locale, data[hover].start) })}</div>
         </Tooltip>
       )}
     </div>

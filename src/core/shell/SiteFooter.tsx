@@ -1,27 +1,31 @@
+"use client";
+
 import Link from "next/link";
 import { config } from "../config";
 import { cn } from "../lib/cn";
+import { useT } from "../i18n";
 
 export function SiteFooter({ className }: { className?: string }) {
+  const t = useT();
   return (
     <footer className={cn("relative z-[1] border-t border-line", className)}>
       <div className="mx-auto flex max-w-[1320px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-6 text-[13px] text-ink-3 sm:px-6">
         <span>
           © {new Date().getFullYear()} {config.appName}
         </span>
-        <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2">
+        <nav aria-label={t("Footer")} className="flex flex-wrap gap-x-5 gap-y-2">
           <Link href="/pricing" className="hover:text-ink">
-            Pricing
+            {t("Pricing")}
           </Link>
           <Link href="/terms" className="hover:text-ink">
-            Terms
+            {t("Terms")}
           </Link>
           <Link href="/privacy" className="hover:text-ink">
-            Privacy
+            {t("Privacy")}
           </Link>
           {config.legal.email.includes("@") && (
             <a href={`mailto:${config.legal.email}`} className="hover:text-ink">
-              Contact
+              {t("Contact")}
             </a>
           )}
         </nav>

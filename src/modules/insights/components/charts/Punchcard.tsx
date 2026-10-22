@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { formatHourLabel, type HourFormat } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import { Tooltip, useWidth } from "./shared";
 
 const PAD = { top: 8, right: 4, bottom: 26, left: 40 };
 
 /** When sit-downs begin: weekday rows × hour columns, dot area = count. */
 export function Punchcard({ grid, max, weekdays, hourFormat }: { grid: number[][]; max: number; weekdays: string[]; hourFormat: HourFormat }) {
+  const t = useT();
   const [ref, width] = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<[number, number] | null>(null);
   const innerW = Math.max(0, width - PAD.left - PAD.right);
@@ -22,7 +24,7 @@ export function Punchcard({ grid, max, weekdays, hourFormat }: { grid: number[][
   return (
     <div ref={ref} className="relative w-full" onPointerLeave={() => setHover(null)}>
       {width > 0 && (
-        <svg width={width} height={height} role="img" aria-label="Sit-down start times by weekday and hour">
+        <svg width={width} height={height} role="img" aria-label={t("Sit-down start times by weekday and hour")}>
           {weekdays.map((name, d) => (
             <g key={name}>
               <text x={PAD.left - 10} y={cy(d)} textAnchor="end" dominantBaseline="central" fontSize="11" fill="var(--c-ink-3)">
@@ -54,10 +56,14 @@ export function Punchcard({ grid, max, weekdays, hourFormat }: { grid: number[][
       {hover && (
         <Tooltip x={cx(hover[1])} y={cy(hover[0]) - r(grid[hover[0]][hover[1]])} width={width}>
           <div className="text-[15px] font-semibold tabular-nums">
-            {grid[hover[0]][hover[1]]} sit-down{grid[hover[0]][hover[1]] === 1 ? "" : "s"}
+            {t(grid[hover[0]][hover[1]] === 1 ? "{count} sit-down" : "{count} sit-downs", { count: grid[hover[0]][hover[1]] })}
           </div>
           <div className="text-[12px] text-ink-3">
-            {weekdays[hover[0]]}, starting {formatHourLabel(hover[1], hourFormat)}:00–{formatHourLabel((hover[1] + 1) % 24, hourFormat)}:00
+            {t("{day}, starting {from}:00–{to}:00", {
+              day: weekdays[hover[0]],
+              from: formatHourLabel(hover[1], hourFormat),
+              to: formatHourLabel((hover[1] + 1) % 24, hourFormat),
+            })}
           </div>
         </Tooltip>
       )}

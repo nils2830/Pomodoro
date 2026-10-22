@@ -5,6 +5,7 @@ import { useAuth } from "../auth/store";
 import { usePrefs } from "../prefs";
 import { toast } from "../ui/store";
 import { useCheckout } from "./CheckoutDialog";
+import { t } from "../i18n";
 
 export type Interval = "month" | "year";
 
@@ -16,9 +17,9 @@ export async function startUpgrade(interval: Interval, router: { push: (href: st
   if (!config.billingEnabled) {
     if (config.demoProAllowed) {
       usePrefs.getState().set({ demoPro: true });
-      toast({ message: "Pro unlocked in demo mode. Billing isn't configured on this deployment.", tone: "success" });
+      toast({ message: t("Pro unlocked in demo mode. Billing isn't configured on this deployment."), tone: "success" });
     } else {
-      toast({ message: "Upgrades aren't available on this deployment yet.", tone: "error" });
+      toast({ message: t("Upgrades aren't available on this deployment yet."), tone: "error" });
     }
     return;
   }
@@ -33,12 +34,12 @@ export async function startUpgrade(interval: Interval, router: { push: (href: st
   });
   const body = (await res.json().catch(() => ({}))) as { clientSecret?: string; error?: string };
   if (body.clientSecret) useCheckout.getState().open(body.clientSecret);
-  else toast({ message: body.error ?? "Couldn't start checkout.", tone: "error" });
+  else toast({ message: body.error ?? t("Couldn't start checkout."), tone: "error" });
 }
 
 export async function openBillingPortal(): Promise<void> {
   const res = await fetch("/api/billing/portal", { method: "POST" });
   const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
   if (body.url) window.location.assign(body.url);
-  else toast({ message: body.error ?? "Couldn't open billing.", tone: "error" });
+  else toast({ message: body.error ?? t("Couldn't open billing."), tone: "error" });
 }

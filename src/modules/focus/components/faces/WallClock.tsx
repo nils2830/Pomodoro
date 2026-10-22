@@ -1,4 +1,5 @@
 import { formatTimeOfDay, MINUTE } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import type { FaceProps } from "./types";
 
 const polar = (deg: number, r: number) => {
@@ -19,6 +20,7 @@ function wedge(fromDeg: number, toDeg: number, r: number) {
  * time still to go.
  */
 export function WallClock(p: FaceProps) {
+  const t = useT();
   const d = new Date(p.now);
   const minutes = d.getMinutes() + d.getSeconds() / 60;
   const hours = (d.getHours() % 12) + minutes / 60;
@@ -69,9 +71,9 @@ export function WallClock(p: FaceProps) {
       </div>
       <div className="shrink-0 text-center text-[13px] whitespace-nowrap text-ink-2 tabular-nums">
         {p.status === "idle"
-          ? `${formatTimeOfDay(p.now, p.hourFormat)} now`
+          ? t("{time} now", { time: formatTimeOfDay(p.now, p.hourFormat) })
           : isFlow
-            ? `Since ${formatTimeOfDay(start, p.hourFormat)}`
+            ? t("Since {time}", { time: formatTimeOfDay(start, p.hourFormat) })
             : `${formatTimeOfDay(start, p.hourFormat)} → ${formatTimeOfDay(p.endsAt ?? p.now + p.remainingMs, p.hourFormat)}`}
       </div>
     </div>

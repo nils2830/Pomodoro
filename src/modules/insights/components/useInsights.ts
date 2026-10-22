@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useEntries } from "@/core/data/entries";
 import { usePrefs } from "@/core/prefs";
-import { weekdayNames } from "@/core/lib/date";
+import { t, useLocale } from "@/core/i18n";
 import { useActivityList } from "@/modules/focus/hooks";
 import {
   activityBreakdown,
@@ -24,11 +24,13 @@ import {
   hourProfile,
   type RangeKey,
 } from "../analytics";
+import { weekdayNames } from "../dates";
 
 export function useInsights(rangeKey: RangeKey, activityId: string | null, now: number) {
   const items = useEntries((s) => s.items);
   const weekStart = usePrefs((s) => s.doc.weekStart);
   const activities = useActivityList(true);
+  const locale = useLocale();
 
   return useMemo(() => {
     const all = Object.values(items);
@@ -42,9 +44,9 @@ export function useInsights(rangeKey: RangeKey, activityId: string | null, now: 
     const kpis = computeKpis(focus, range);
     const prevKpis = computeKpis(prevFocus, prev);
     const unit = unitFor(range);
-    const names = weekdayNames(weekStart);
-    const longNames = weekdayNames(weekStart, true);
-    const activityName = (id: string | null) => activities.find((a) => a.id === id)?.name ?? "Unassigned";
+    const names = weekdayNames(locale, weekStart);
+    const longNames = weekdayNames(locale, weekStart, true);
+    const activityName = (id: string | null) => activities.find((a) => a.id === id)?.name ?? t("Unassigned");
 
     return {
       range,
@@ -68,7 +70,7 @@ export function useInsights(rangeKey: RangeKey, activityId: string | null, now: 
       weekdayNames: names,
       activityName,
     };
-  }, [items, rangeKey, activityId, now, weekStart, activities]);
+  }, [items, rangeKey, activityId, now, weekStart, activities, locale]);
 }
 
 export type InsightsData = ReturnType<typeof useInsights>;

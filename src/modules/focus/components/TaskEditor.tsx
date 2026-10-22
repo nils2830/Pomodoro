@@ -7,12 +7,14 @@ import { NumberField, Select } from "@/core/ui/fields";
 import { ProBadge } from "@/core/ui/ProBadge";
 import { useCan } from "@/core/billing/entitlements";
 import { useUI } from "@/core/ui/store";
+import { useT } from "@/core/i18n";
 import type { Task } from "../types";
 import { useTasks } from "../store/data";
 import { useTimer } from "../store/timer";
 import { useActivityList, useProjectList, useTaskList } from "../hooks";
 
 export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }) {
+  const t = useT();
   const tasks = useTaskList();
   const activities = useActivityList();
   const projects = useProjectList();
@@ -58,31 +60,31 @@ export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }
           ref={input}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="What are you working on?"
-          aria-label="Task title"
+          placeholder={t("What are you working on?")}
+          aria-label={t("Task title")}
           className="display w-full bg-transparent text-[22px] leading-tight outline-none placeholder:text-ink-3/70"
         />
 
         <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
           <div>
-            <div className="eyebrow mb-2 text-ink-3">{task ? "Done / estimated" : "Est. sessions"}</div>
+            <div className="eyebrow mb-2 text-ink-3">{task ? t("Done / estimated") : t("Est. sessions")}</div>
             <div className="flex items-center gap-2">
               {task && (
                 <>
-                  <NumberField label="Completed sessions" value={act} onChange={setAct} min={0} max={99} />
+                  <NumberField label={t("Completed sessions")} value={act} onChange={setAct} min={0} max={99} />
                   <span className="text-ink-3">/</span>
                 </>
               )}
-              <NumberField label="Estimated sessions" value={est} onChange={setEst} min={1} max={99} />
+              <NumberField label={t("Estimated sessions")} value={est} onChange={setEst} min={1} max={99} />
             </div>
           </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="eyebrow mb-2 block text-ink-3">Activity</span>
+            <span className="eyebrow mb-2 block text-ink-3">{t("Activity")}</span>
             <Select value={activityId ?? ""} onChange={(e) => setActivityId(e.target.value || null)} wrapperClassName="w-full">
-              <option value="">Use current</option>
+              <option value="">{t("Use current")}</option>
               {activities.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name}
@@ -91,10 +93,12 @@ export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }
             </Select>
           </label>
           <label className="block">
-            <span className="eyebrow mb-2 flex items-center gap-1.5 text-ink-3">Project {!canProjects && <ProBadge />}</span>
+            <span className="eyebrow mb-2 flex items-center gap-1.5 text-ink-3">
+              {t("Project")} {!canProjects && <ProBadge />}
+            </span>
             {canProjects ? (
               <Select value={projectId ?? ""} onChange={(e) => setProjectId(e.target.value || null)} wrapperClassName="w-full">
-                <option value="">No project</option>
+                <option value="">{t("No project")}</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -107,7 +111,7 @@ export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }
                 onClick={() => openUpgrade("projects")}
                 className="h-10 w-full rounded-full bg-fill px-4 text-left text-sm font-medium text-ink-3 hover:bg-ink/10"
               >
-                Group by project
+                {t("Group by project")}
               </button>
             )}
           </label>
@@ -117,7 +121,7 @@ export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Notes, links, the next small step…"
+            placeholder={t("Notes, links, the next small step…")}
             rows={3}
             autoFocus={!task?.note}
             className="w-full resize-none rounded-2xl bg-fill px-4 py-3 text-[14px] leading-relaxed outline-none placeholder:text-ink-3"
@@ -128,7 +132,7 @@ export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }
             onClick={() => setShowNote(true)}
             className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-3 underline-offset-4 hover:text-ink hover:underline"
           >
-            <Plus size={13} weight="bold" /> Add note
+            <Plus size={13} weight="bold" /> {t("Add note")}
           </button>
         )}
       </div>
@@ -145,15 +149,15 @@ export function TaskEditor({ task, onDone }: { task?: Task; onDone: () => void }
               onDone();
             }}
           >
-            Delete
+            {t("Delete")}
           </Button>
         )}
         <div className="ml-auto flex gap-2">
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button variant="primary" size="sm" type="submit" disabled={!title.trim()} className="px-5">
-            Save
+            {t("Save")}
           </Button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { useGate } from "@/core/billing/useGate";
 import { usePrefs } from "@/core/prefs";
 import { cn } from "@/core/lib/cn";
 import { MINUTE } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import { useTimer } from "../store/timer";
 import { useFocusSettings } from "../store/settings";
 import { useFaceProps, useTaskList } from "../hooks";
@@ -49,21 +50,22 @@ function SessionLine() {
   const tasks = useTaskList();
   const task = tasks.find((t) => t.id === activeTaskId);
   const name = usePrefs((s) => s.doc.name);
-  const focusPrompt = name ? `${MODE_PROMPT.focus.replace(/\.$/, "")}, ${name}.` : MODE_PROMPT.focus;
-  const prompt = mode === "focus" ? (task ? task.title : flow ? "Follow the flow." : focusPrompt) : MODE_PROMPT[mode];
+  const t = useT();
+  const focusPrompt = name ? t("Time to focus, {name}.", { name }) : t(MODE_PROMPT.focus);
+  const prompt = mode === "focus" ? (task ? task.title : flow ? t("Follow the flow.") : focusPrompt) : t(MODE_PROMPT[mode]);
 
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <div className="flex max-w-full items-baseline gap-2.5 px-4">
         <button
           type="button"
-          title="Reset the round counter"
+          title={t("Reset the round counter")}
           onClick={async () => {
             if (
               await confirmAction({
-                title: "Reset the round counter?",
-                body: "Starts again from #1. Your logged sessions are not affected.",
-                confirmLabel: "Reset",
+                title: t("Reset the round counter?"),
+                body: t("Starts again from #1. Your logged sessions are not affected."),
+                confirmLabel: t("Reset"),
               })
             )
               resetRound();
@@ -90,24 +92,25 @@ export function TimerStage() {
   const gate = useGate();
   const warmup = usePendingWarmup();
   const openSettings = useUI((s) => s.openSettings);
+  const t = useT();
 
   const toolbar = (
     <div className="flex items-center gap-0.5">
-      <IconButton label={hidden ? "Show timer (H)" : "Hide timer (H)"} onClick={() => setSettings({ hideTimer: !hidden })} active={hidden}>
+      <IconButton label={hidden ? t("Show timer (H)") : t("Hide timer (H)")} onClick={() => setSettings({ hideTimer: !hidden })} active={hidden}>
         {hidden ? <EyeSlash size={20} weight="bold" /> : <Eye size={20} weight="bold" />}
       </IconButton>
       <FacePicker />
-      <IconButton label="Pop-out timer" onClick={() => gate("popout", () => void openPopout())} className="hidden sm:inline-flex">
+      <IconButton label={t("Pop-out timer")} onClick={() => gate("popout", () => void openPopout())} className="hidden sm:inline-flex">
         <PictureInPicture size={20} weight="bold" />
       </IconButton>
-      <IconButton label={zen ? "Leave zen (Z)" : "Zen mode (Z)"} onClick={() => setZen(!zen)}>
+      <IconButton label={zen ? t("Leave zen (Z)") : t("Zen mode (Z)")} onClick={() => setZen(!zen)}>
         {zen ? <ArrowsInSimple size={20} weight="bold" /> : <CornersOut size={20} weight="bold" />}
       </IconButton>
     </div>
   );
 
   return (
-    <section aria-label="Timer" className={cn("relative flex w-full flex-col items-center", zen ? "gap-8" : "gap-6")}>
+    <section aria-label={t("Timer")} className={cn("relative flex w-full flex-col items-center", zen ? "gap-8" : "gap-6")}>
       <div
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/2 -z-10 size-[min(100vw,820px)] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-2xl"
@@ -129,11 +132,11 @@ export function TimerStage() {
             <button
               type="button"
               onClick={() => openSettings("warmup")}
-              title="Warm-up settings"
+              title={t("Warm-up settings")}
               className="animate-fade inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] text-ink-3 hover:bg-fill hover:text-ink"
             >
               <span className="size-1.5 rounded-full bg-current" />
-              Starts with a {warmup >= 60 && warmup % 60 === 0 ? `${warmup / 60} min` : `${warmup} s`} warm-up
+              {t("Starts with a {length} warm-up", { length: warmup >= 60 && warmup % 60 === 0 ? `${warmup / 60} min` : `${warmup} s` })}
             </button>
           )}
           {status === "running" && !flow && (
@@ -142,7 +145,7 @@ export function TimerStage() {
               onClick={() => extend(MINUTE)}
               className="animate-fade rounded-full px-3 py-1.5 text-[13px] font-medium text-ink-3 hover:bg-fill hover:text-ink"
             >
-              + 1 minute
+              {t("+ 1 minute")}
             </button>
           )}
         </div>

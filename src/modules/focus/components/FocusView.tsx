@@ -6,6 +6,7 @@ import { useUI } from "@/core/ui/store";
 import { isTypingTarget } from "@/core/lib/dom";
 import { cn } from "@/core/lib/cn";
 import { MINUTE } from "@/core/lib/time";
+import { t as tr, useT } from "@/core/i18n";
 import { useTimer } from "../store/timer";
 import { useFocusSettings } from "../store/settings";
 import { TimerStage } from "./TimerStage";
@@ -14,6 +15,7 @@ import { TaskPanel } from "./TaskPanel";
 import { ProgressLine } from "./ProgressLine";
 
 export function FocusView() {
+  const t = useT();
   const zen = useUI((s) => s.zen);
   const setZen = useUI((s) => s.setZen);
   const [addRequest, setAddRequest] = useState(0);
@@ -46,7 +48,7 @@ export function FocusView() {
           break;
         case "f":
         case "F":
-          (document.querySelector('[aria-label="Timer face (F)"]') as HTMLButtonElement | null)?.click();
+          (document.querySelector(`[aria-label="${tr("Timer face (F)")}"]`) as HTMLButtonElement | null)?.click();
           break;
         case "z":
         case "Z":
@@ -86,7 +88,7 @@ export function FocusView() {
           onClick={() => setZen(false)}
           className="absolute top-5 right-5 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink-3 hover:bg-fill hover:text-ink"
         >
-          <X size={16} weight="bold" /> Leave zen <span className="font-mono text-[11px] opacity-70">esc</span>
+          <X size={16} weight="bold" /> {t("Leave zen")} <span className="font-mono text-[11px] opacity-70">esc</span>
         </button>
         <TimerStage />
       </div>

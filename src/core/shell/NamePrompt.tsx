@@ -8,6 +8,7 @@ import { getSupabase } from "../auth/supabase-browser";
 import { usePrefs } from "../prefs";
 import { useSyncStatus } from "../data/SyncProvider";
 import { LogoMark } from "../ui/Logo";
+import { useT } from "../i18n";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -28,6 +29,7 @@ export function NamePrompt() {
   const asked = usePrefs((s) => s.doc.nameAsked || Boolean(s.doc.name));
   const set = usePrefs((s) => s.set);
   const [name, setName] = useState("");
+  const t = useT();
   const show = status === "signedIn" && synced && !asked;
 
   useEffect(() => {
@@ -67,16 +69,16 @@ export function NamePrompt() {
           >
             <LogoMark size={34} animated className="mx-auto" />
             <h2 id="name-prompt-title" className="display mt-6 text-[30px] leading-none">
-              What should we call you?
+              {t("What should we call you?")}
             </h2>
-            <p className="mt-3 text-[14.5px] text-ink-3">A first name is plenty. Only you will see it.</p>
+            <p className="mt-3 text-[14.5px] text-ink-3">{t("A first name is plenty. Only you will see it.")}</p>
             <input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={40}
-              placeholder="Your name"
-              aria-label="Your name"
+              placeholder={t("Your name")}
+              aria-label={t("Your name")}
               className="own-focus mt-7 h-14 w-full rounded-full bg-fill px-6 text-center text-[18px] ring-1 ring-line outline-none placeholder:text-ink-3 focus:ring-ink/40"
             />
             <button
@@ -84,10 +86,10 @@ export function NamePrompt() {
               disabled={!name.trim()}
               className="group mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink text-[15px] font-medium text-page transition-[opacity,transform] hover:-translate-y-px disabled:opacity-40"
             >
-              Continue <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+              {t("Continue")} <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
             </button>
             <button type="button" onClick={() => save("")} className="mt-3 text-[13px] text-ink-3 hover:text-ink">
-              Skip for now
+              {t("Skip for now")}
             </button>
           </motion.form>
         </motion.div>

@@ -13,6 +13,7 @@ import { usePlan } from "./entitlements";
 import { useAuth } from "../auth/store";
 import { LogoMark } from "../ui/Logo";
 import { FEATURES, FREE_INCLUDES, PRICING, PRO_HIGHLIGHTS } from "./plans";
+import { t as translate, useT } from "../i18n";
 import { startUpgrade, type Interval } from "./checkout";
 
 const COMPARE: [string, boolean | string, boolean | string][] = [
@@ -57,12 +58,14 @@ const FAQ: { q: string; a: string }[] = [
 ];
 
 function Cell({ v }: { v: boolean | string }) {
-  if (v === true) return <Check size={17} weight="bold" className="mx-auto" aria-label="Included" />;
-  if (v === false) return <Minus size={17} weight="bold" className="mx-auto text-ink-3" aria-label="Not included" />;
-  return <span className="text-[13.5px]">{v}</span>;
+  const t = useT();
+  if (v === true) return <Check size={17} weight="bold" className="mx-auto" aria-label={t("Included")} />;
+  if (v === false) return <Minus size={17} weight="bold" className="mx-auto text-ink-3" aria-label={t("Not included")} />;
+  return <span className="text-[13.5px]">{t(v)}</span>;
 }
 
 export function PricingView() {
+  const t = useT();
   const plan = usePlan();
   const router = useRouter();
   const params = useSearchParams();
@@ -72,7 +75,7 @@ export function PricingView() {
   const monthly = interval === "year" ? (PRICING.yearly / 12).toFixed(2).replace(/\.00$/, "") : String(PRICING.monthly);
 
   useEffect(() => {
-    if (params.get("checkout") === "cancelled") toast("Checkout cancelled. Nothing was charged.");
+    if (params.get("checkout") === "cancelled") toast(translate("Checkout cancelled. Nothing was charged."));
   }, [params]);
 
   const upgrade = async () => {
@@ -84,36 +87,37 @@ export function PricingView() {
   return (
     <div className="mx-auto w-full max-w-[1180px] px-4 pt-8 pb-28 sm:px-8 sm:pt-14">
       <div className="max-w-[760px]">
-        <div className="eyebrow text-ink-3">Pricing</div>
-        <h1 className="display mt-4 text-[clamp(2.8rem,7.5vw,6rem)] leading-[0.86]">The timer is free. The depth is Pro.</h1>
+        <div className="eyebrow text-ink-3">{t("Pricing")}</div>
+        <h1 className="display mt-4 text-[clamp(2.8rem,7.5vw,6rem)] leading-[0.86]">{t("The timer is free. The depth is Pro.")}</h1>
         <p className="mt-6 max-w-[48ch] text-[17px] leading-relaxed text-ink-2">
-          Every account starts free, with your sessions saved from the first minute. Pro is for the full picture: deep insights, every face and landscape, and
-          flow mode.
+          {t(
+            "Every account starts free, with your sessions saved from the first minute. Pro is for the full picture: deep insights, every face and landscape, and flow mode.",
+          )}
         </p>
       </div>
 
       <div className="mt-10">
         <Segmented<Interval>
-          ariaLabel="Billing interval"
+          ariaLabel={t("Billing interval")}
           value={interval}
           onChange={setInterval}
           options={[
-            { value: "month", label: "Monthly" },
-            { value: "year", label: "Yearly · save 25%" },
+            { value: "month", label: t("Monthly") },
+            { value: "year", label: t("Yearly · save 25%") },
           ]}
         />
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         <div className="flex flex-col rounded-[32px] border border-line p-8">
-          <div className="eyebrow text-ink-3">Free</div>
+          <div className="eyebrow text-ink-3">{t("Free")}</div>
           <div className="mt-5 text-[52px] leading-none font-semibold tracking-[-0.04em]">{PRICING.symbol}0</div>
-          <div className="mt-2 text-[14px] text-ink-3">Free forever. Just create an account.</div>
+          <div className="mt-2 text-[14px] text-ink-3">{t("Free forever. Just create an account.")}</div>
           <ul className="mt-8 flex-1 space-y-3">
             {FREE_INCLUDES.map((f) => (
               <li key={f} className="flex gap-3 text-[15px]">
                 <Check size={17} weight="bold" className="mt-0.5 shrink-0 text-ink-3" />
-                {f}
+                {t(f)}
               </li>
             ))}
           </ul>
@@ -122,11 +126,11 @@ export function PricingView() {
               href="/login?mode=signup"
               className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line text-[15px] font-medium transition-colors hover:bg-fill"
             >
-              Create a free account <ArrowRight size={16} weight="bold" />
+              {t("Create a free account")} <ArrowRight size={16} weight="bold" />
             </Link>
           ) : (
             <Button variant="outline" size="lg" className="mt-8" disabled>
-              {plan === "free" ? "Your current plan" : "Included"}
+              {plan === "free" ? t("Your current plan") : t("Included")}
             </Button>
           )}
         </div>
@@ -139,17 +143,18 @@ export function PricingView() {
               {PRICING.symbol}
               {monthly}
             </span>
-            <span className="text-[15px] opacity-75">/ month</span>
+            <span className="text-[15px] opacity-75">{t("/ month")}</span>
           </div>
           <div className="mt-2 text-[14px] opacity-75">
-            {interval === "year" ? `${PRICING.symbol}${PRICING.yearly} billed once a year.` : "Billed monthly."} Cancel anytime.
+            {interval === "year" ? t("{price} billed once a year.", { price: `${PRICING.symbol}${PRICING.yearly}` }) : t("Billed monthly.")}{" "}
+            {t("Cancel anytime.")}
           </div>
           <ul className="relative mt-8 flex-1 space-y-3">
             {PRO_HIGHLIGHTS.slice(0, 8).map((f) => (
               <li key={f} className="flex gap-3 text-[15px]">
                 <Check size={17} weight="bold" className="mt-0.5 shrink-0 opacity-75" />
                 <span>
-                  <b className="font-semibold">{FEATURES[f].label}.</b> <span className="opacity-80">{FEATURES[f].detail}</span>
+                  <b className="font-semibold">{t(FEATURES[f].label)}.</b> <span className="opacity-80">{t(FEATURES[f].detail)}</span>
                 </span>
               </li>
             ))}
@@ -160,32 +165,38 @@ export function PricingView() {
             disabled={busy || plan === "pro"}
             className="relative mt-8 inline-flex h-14 items-center justify-center gap-2 rounded-full bg-[#12110f] text-[16px] font-semibold text-[#f3eee6] transition-transform hover:-translate-y-0.5 disabled:opacity-70"
           >
-            {plan === "pro" ? "You're on Pro" : !config.billingEnabled ? "Unlock Pro (demo mode)" : signedOut ? "Start free, then upgrade" : "Upgrade to Pro"}
+            {plan === "pro"
+              ? t("You're on Pro")
+              : !config.billingEnabled
+                ? t("Unlock Pro (demo mode)")
+                : signedOut
+                  ? t("Start free, then upgrade")
+                  : t("Upgrade to Pro")}
             {plan !== "pro" && <ArrowRight size={18} weight="bold" />}
           </button>
           <p className="relative mt-3 text-center text-[12.5px] opacity-60">
             {config.billingEnabled
-              ? "Secure checkout with Stripe. 14-day refund on your first payment."
-              : "Payments aren't connected on this deployment, so Pro unlocks locally for testing."}
+              ? t("Secure checkout with Stripe. 14-day refund on your first payment.")
+              : t("Payments aren't connected on this deployment, so Pro unlocks locally for testing.")}
           </p>
         </div>
       </div>
 
       <div className="mt-20">
-        <h2 className="display text-[32px] leading-none">Side by side</h2>
+        <h2 className="display text-[32px] leading-none">{t("Side by side")}</h2>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full min-w-[560px] border-t border-ink/80 text-left">
             <thead>
               <tr className="border-b border-line">
-                <th className="py-3 pr-4 text-[13px] font-medium text-ink-3">Feature</th>
-                <th className="w-[26%] py-3 text-center text-[13px] font-medium text-ink-3">Free</th>
+                <th className="py-3 pr-4 text-[13px] font-medium text-ink-3">{t("Feature")}</th>
+                <th className="w-[26%] py-3 text-center text-[13px] font-medium text-ink-3">{t("Free")}</th>
                 <th className="w-[26%] py-3 text-center text-[13px] font-semibold">Pro</th>
               </tr>
             </thead>
             <tbody>
               {COMPARE.map(([label, free, pro]) => (
                 <tr key={label} className="border-b border-line">
-                  <td className="py-3.5 pr-4 text-[15px]">{label}</td>
+                  <td className="py-3.5 pr-4 text-[15px]">{t(label)}</td>
                   <td className="py-3.5 text-center text-ink-2">
                     <Cell v={free} />
                   </td>
@@ -200,10 +211,10 @@ export function PricingView() {
       </div>
 
       <div className="mt-20 grid gap-8 md:grid-cols-[1fr_1.6fr]">
-        <h2 className="display text-[32px] leading-none">Questions</h2>
+        <h2 className="display text-[32px] leading-none">{t("Questions")}</h2>
         <div className="border-t border-ink/80">
           {FAQ.map((item) => (
-            <FaqItem key={item.q} {...item} />
+            <FaqItem key={item.q} q={t(item.q)} a={t(item.a)} />
           ))}
         </div>
       </div>

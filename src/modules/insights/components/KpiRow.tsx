@@ -1,6 +1,7 @@
 import { ArrowDownRight, ArrowUpRight } from "@phosphor-icons/react";
 import { formatDuration } from "@/core/lib/time";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import type { InsightsData } from "./useInsights";
 
 function Delta({ now, before, invert, label }: { now: number; before: number; invert?: boolean; label: string }) {
@@ -27,27 +28,28 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: React
 }
 
 export function KpiRow({ data }: { data: InsightsData }) {
+  const t = useT();
   const { kpis, prevKpis, streak, range } = data;
-  const vs = range.key === "all" ? "" : "vs before";
+  const vs = range.key === "all" ? "" : t("vs before");
   return (
     <div className="grid grid-cols-2 border-y border-line sm:grid-cols-3 lg:grid-cols-5">
-      <Stat label="Focused" value={formatDuration(kpis.focusMs)} sub={<Delta now={kpis.focusMs} before={prevKpis.focusMs} label={vs} />} />
-      <Stat label="Sit-downs" value={String(kpis.sitDowns)} sub={<Delta now={kpis.sitDowns} before={prevKpis.sitDowns} label={vs} />} />
+      <Stat label={t("Focused")} value={formatDuration(kpis.focusMs)} sub={<Delta now={kpis.focusMs} before={prevKpis.focusMs} label={vs} />} />
+      <Stat label={t("Sit-downs")} value={String(kpis.sitDowns)} sub={<Delta now={kpis.sitDowns} before={prevKpis.sitDowns} label={vs} />} />
       <Stat
-        label="Avg sit-down"
+        label={t("Avg sit-down")}
         value={kpis.sitDowns ? formatDuration(kpis.avgSitDownMs) : "–"}
-        sub={<span className="text-ink-3">longest {formatDuration(kpis.longestSitDownMs)}</span>}
+        sub={<span className="text-ink-3">{t("longest {duration}", { duration: formatDuration(kpis.longestSitDownMs) })}</span>}
       />
       <Stat
-        label="Active days"
+        label={t("Active days")}
         value={`${kpis.activeDays}`}
         sub={
           <span className="text-ink-3">
-            of {kpis.totalDays} · {kpis.activeDays ? formatDuration(kpis.avgPerActiveDayMs) : "0m"}/day
+            {t("of {total} · {avg}/day", { total: kpis.totalDays, avg: kpis.activeDays ? formatDuration(kpis.avgPerActiveDayMs) : "0m" })}
           </span>
         }
       />
-      <Stat label="Streak" value={`${streak.current}d`} sub={<span className="text-ink-3">best {streak.longest} days</span>} />
+      <Stat label={t("Streak")} value={`${streak.current}d`} sub={<span className="text-ink-3">{t("best {count} days", { count: streak.longest })}</span>} />
     </div>
   );
 }

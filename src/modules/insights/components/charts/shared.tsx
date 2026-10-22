@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 
 export function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -128,6 +129,7 @@ export function Block({
   className?: string;
   aside?: ReactNode;
 }) {
+  const t = useT();
   const [showTable, setShowTable] = useState(false);
   return (
     <section className={cn("min-w-0 border-t border-ink/80 pt-4", className)}>
@@ -149,7 +151,7 @@ export function Block({
                   onClick={() => setShowTable(v === "Table")}
                   className={cn("rounded-full px-2.5 py-1 transition-colors", (v === "Table") === showTable ? "bg-ink text-page" : "text-ink-3 hover:text-ink")}
                 >
-                  {v}
+                  {t(v)}
                 </button>
               ))}
             </div>

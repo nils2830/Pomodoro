@@ -12,6 +12,7 @@ import { usePrefs } from "@/core/prefs";
 import { formatHours, formatTimeOfDay } from "@/core/lib/time";
 import { useNow } from "@/core/lib/useNow";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import { useTasks } from "../store/data";
 import { useTimer } from "../store/timer";
 import { useFocusSettings } from "../store/settings";
@@ -23,6 +24,7 @@ import { TaskEditor } from "./TaskEditor";
 import { TemplatesDialog } from "./TemplatesDialog";
 
 export function TaskPanel({ addRequest }: { addRequest: number }) {
+  const t = useT();
   const tasks = useTaskList();
   const projects = useProjectList();
   const activeTaskId = useTimer((s) => s.activeTaskId);
@@ -54,16 +56,16 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
   };
 
   return (
-    <section aria-label="Tasks" className="flex flex-col">
+    <section aria-label={t("Tasks")} className="flex flex-col">
       <div className="flex items-center justify-between pb-3">
         <div className="flex items-baseline gap-3">
-          <h2 className="display text-[26px] leading-none">Tasks</h2>
-          {tasks.length > 0 && <span className="text-[13px] text-ink-3">{remaining.length} open</span>}
+          <h2 className="display text-[26px] leading-none">{t("Tasks")}</h2>
+          {tasks.length > 0 && <span className="text-[13px] text-ink-3">{t("{count} open", { count: remaining.length })}</span>}
         </div>
         <Popover
           align="end"
           trigger={(props) => (
-            <IconButton label="Task options" {...props}>
+            <IconButton label={t("Task options")} {...props}>
               <DotsThree size={22} weight="bold" />
             </IconButton>
           )}
@@ -77,7 +79,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
                   useTasks.getState().removeWhere((t) => t.done);
                 }}
               >
-                Clear finished tasks
+                {t("Clear finished tasks")}
               </MenuItem>
               <MenuItem
                 icon={<ArrowCounterClockwise size={16} weight="bold" />}
@@ -86,7 +88,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
                   tasks.forEach((t) => t.act && useTasks.getState().update(t.id, { act: 0 }));
                 }}
               >
-                Reset session counts
+                {t("Reset session counts")}
               </MenuItem>
               <MenuSeparator />
               <MenuItem
@@ -98,7 +100,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
                   gate("templates", () => setTemplates("save"));
                 }}
               >
-                Save as template
+                {t("Save as template")}
               </MenuItem>
               <MenuItem
                 icon={<Stack size={16} weight="bold" />}
@@ -108,7 +110,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
                   gate("templates", () => setTemplates("load"));
                 }}
               >
-                Add from template
+                {t("Add from template")}
               </MenuItem>
               <MenuSeparator />
               <MenuItem
@@ -118,14 +120,19 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
                 onClick={async () => {
                   close();
                   if (
-                    await confirmAction({ title: "Clear all tasks?", body: "Your logged time stays in Insights.", confirmLabel: "Clear all", tone: "danger" })
+                    await confirmAction({
+                      title: t("Clear all tasks?"),
+                      body: t("Your logged time stays in Insights."),
+                      confirmLabel: t("Clear all"),
+                      tone: "danger",
+                    })
                   ) {
                     useTasks.getState().removeWhere(() => true);
                     useTimer.getState().setActiveTask(null);
                   }
                 }}
               >
-                Clear all tasks
+                {t("Clear all tasks")}
               </MenuItem>
             </>
           )}
@@ -182,7 +189,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
             className="flex h-14 w-full items-center justify-center gap-2 rounded-[18px] border-2 border-dashed border-ink/25 text-[15px] font-semibold text-ink-2 transition-colors hover:border-ink/50 hover:bg-fill hover:text-ink"
           >
             <Plus size={18} weight="bold" />
-            Add task
+            {t("Add task")}
           </button>
         )}
       </div>
@@ -195,6 +202,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
 }
 
 function FinishEstimate() {
+  const t = useT();
   const tasks = useTaskList();
   const timer = useTimer();
   const settings = useFocusSettings((s) => s.doc);
@@ -216,15 +224,16 @@ function FinishEstimate() {
   return (
     <div className={cn("mt-4 flex items-center justify-center gap-5 rounded-[18px] bg-fill px-4 py-3.5 text-[14px] text-ink-2")}>
       <span>
-        Sessions <b className="tnum font-semibold text-ink">{act}</b>/<span className="tnum">{est}</span>
+        {t("Sessions")} <b className="tnum font-semibold text-ink">{act}</b>/<span className="tnum">{est}</span>
       </span>
       <span className="h-4 w-px bg-line" />
       <span>
         {left === 0 ? (
-          "All caught up"
+          t("All caught up")
         ) : (
           <>
-            Done by <b className="tnum font-semibold text-ink">{formatTimeOfDay(now + ms, hourFormat)}</b> <span className="tnum">({formatHours(ms)})</span>
+            {t("Done by")} <b className="tnum font-semibold text-ink">{formatTimeOfDay(now + ms, hourFormat)}</b>{" "}
+            <span className="tnum">({formatHours(ms)})</span>
           </>
         )}
       </span>

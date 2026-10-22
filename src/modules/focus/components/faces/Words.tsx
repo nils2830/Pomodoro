@@ -1,4 +1,5 @@
 import { MINUTE } from "@/core/lib/time";
+import { localeTag, useLocale, useT } from "@/core/i18n";
 import type { FaceProps } from "./types";
 
 function focusPhrase(t: number): string {
@@ -18,28 +19,30 @@ function breakPhrase(t: number): string {
   return "Break's nearly over.";
 }
 
-function flowPhrase(ms: number): string {
+function flowPhrase(ms: number, t: ReturnType<typeof useT>, tag: string): string {
   const min = ms / MINUTE;
-  if (min < 3) return "Just getting started.";
-  if (min < 55) return `About ${Math.round(min / 5) * 5} minutes in.`;
-  if (min < 75) return "About an hour in.";
+  if (min < 3) return t("Just getting started.");
+  if (min < 55) return t("About {count} minutes in.", { count: Math.round(min / 5) * 5 });
+  if (min < 75) return t("About an hour in.");
   const h = Math.round((min / 60) * 2) / 2;
-  return `About ${h} hours in.`;
+  return t("About {count} hours in.", { count: h.toLocaleString(tag) });
 }
 
 /** Time in plain language. Coarse on purpose. */
 export function Words(p: FaceProps) {
+  const t = useT();
+  const locale = useLocale();
   const isFlow = p.flow && p.mode === "focus";
   const text =
     p.status === "idle"
       ? p.mode === "focus"
-        ? "Ready when you are."
-        : "Take a breather."
+        ? t("Ready when you are.")
+        : t("Take a breather.")
       : isFlow
-        ? flowPhrase(p.elapsedMs)
+        ? flowPhrase(p.elapsedMs, t, localeTag(locale))
         : p.mode === "focus"
-          ? focusPhrase(p.progress)
-          : breakPhrase(p.progress);
+          ? t(focusPhrase(p.progress))
+          : t(breakPhrase(p.progress));
   return (
     <div className="grid h-full place-items-center px-4">
       <p key={text} className="display animate-rise max-w-[11ch] text-center text-[min(13cqw,26cqh)] leading-[0.95] text-balance">

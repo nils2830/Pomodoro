@@ -6,6 +6,7 @@
 import type { Entry } from "@/core/data/entries";
 import { addDays, addMonths, dayKey, daysBetween, endOfDay, startOfDay, startOfMonth, startOfWeek, weekdayIndex, type WeekStart } from "@/core/lib/date";
 import { DAY, HOUR, MINUTE } from "@/core/lib/time";
+import { localeTag, t } from "@/core/i18n";
 
 export type RangeKey = "7d" | "30d" | "90d" | "1y" | "all";
 
@@ -372,8 +373,14 @@ export function observations(
   if (kpis.activeDays >= 3) {
     out.push({
       id: "frequency",
-      title: `${kpis.sitDownsPerActiveDay.toFixed(1)} sit-downs on a working day`,
-      detail: `On the ${kpis.activeDays} days you worked, you sat down ${kpis.sitDowns} times and stayed ${fmtDur(kpis.avgSitDownMs)} on average.`,
+      title: t("{count} sit-downs on a working day", {
+        count: kpis.sitDownsPerActiveDay.toLocaleString(localeTag(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+      }),
+      detail: t("On the {days} days you worked, you sat down {count} times and stayed {avg} on average.", {
+        days: kpis.activeDays,
+        count: kpis.sitDowns,
+        avg: fmtDur(kpis.avgSitDownMs),
+      }),
     });
   }
 
@@ -391,8 +398,12 @@ export function observations(
     if (wd[best].avgMs > otherAvg * 1.15) {
       out.push({
         id: "best-day",
-        title: `${opts.weekdayNames[best]}s are your strongest day`,
-        detail: `You average ${fmtDur(wd[best].avgMs)} on ${opts.weekdayNames[best]}s, against ${fmtDur(otherAvg)} on other days.`,
+        title: t("{day}s are your strongest day", { day: opts.weekdayNames[best] }),
+        detail: t("You average {avg} on {day}s, against {other} on other days.", {
+          avg: fmtDur(wd[best].avgMs),
+          day: opts.weekdayNames[best],
+          other: fmtDur(otherAvg),
+        }),
       });
     }
   }
@@ -409,8 +420,8 @@ export function observations(
     }
     out.push({
       id: "peak",
-      title: `Your peak hours are ${fmtClock(bestH * 60)}–${fmtClock((bestH + 2) * 60)}`,
-      detail: `${pct(bestSum / total)} of all your focus time falls in that two-hour window.`,
+      title: t("Your peak hours are {from}–{to}", { from: fmtClock(bestH * 60), to: fmtClock((bestH + 2) * 60) }),
+      detail: t("{share} of all your focus time falls in that two-hour window.", { share: pct(bestSum / total) }),
     });
   }
 
@@ -419,11 +430,11 @@ export function observations(
   if (first && first.days >= 5) {
     out.push({
       id: "first-start",
-      title: `You usually start around ${fmtClock(Math.round(first.medianMin / 5) * 5)}`,
+      title: t("You usually start around {time}", { time: fmtClock(Math.round(first.medianMin / 5) * 5) }),
       detail:
         first.spreadMin <= 30
-          ? `Give or take ${Math.max(5, first.spreadMin)} minutes. That's a steady routine.`
-          : `But it varies by about ${first.spreadMin} minutes either way. A fixed start time can make sitting down easier.`,
+          ? t("Give or take {min} minutes. That's a steady routine.", { min: Math.max(5, first.spreadMin) })
+          : t("But it varies by about {min} minutes either way. A fixed start time can make sitting down easier.", { min: first.spreadMin }),
     });
   }
 
@@ -437,8 +448,8 @@ export function observations(
     if (Math.abs(diff) >= 0.15) {
       out.push({
         id: "late",
-        title: `Late sit-downs run ${pct(Math.abs(diff))} ${diff < 0 ? "shorter" : "longer"}`,
-        detail: `After 21:00 you stay ${fmtDur(lateAvg)} on average, against ${fmtDur(earlyAvg)} earlier in the day.`,
+        title: t(diff < 0 ? "Late sit-downs run {pct} shorter" : "Late sit-downs run {pct} longer", { pct: pct(Math.abs(diff)) }),
+        detail: t("After 21:00 you stay {late} on average, against {early} earlier in the day.", { late: fmtDur(lateAvg), early: fmtDur(earlyAvg) }),
       });
     }
   }
@@ -452,8 +463,8 @@ export function observations(
     if (Math.abs(change) >= 0.08) {
       out.push({
         id: "trend",
-        title: `${change > 0 ? "Up" : "Down"} ${pct(Math.abs(change))} on the four weeks before`,
-        detail: `${fmtDur(recent)} in the last four weeks, ${fmtDur(before)} in the four before that.`,
+        title: t(change > 0 ? "Up {pct} on the four weeks before" : "Down {pct} on the four weeks before", { pct: pct(Math.abs(change)) }),
+        detail: t("{recent} in the last four weeks, {before} in the four before that.", { recent: fmtDur(recent), before: fmtDur(before) }),
       });
     }
   }
@@ -462,8 +473,8 @@ export function observations(
   if (kpis.completionRate != null && kpis.sessions >= 10) {
     out.push({
       id: "completion",
-      title: `You finish ${pct(kpis.completionRate)} of the sessions you start`,
-      detail: kpis.completionRate >= 0.85 ? "When you sit down, you tend to stay." : "If you often stop early, try a shorter focus length for a while.",
+      title: t("You finish {pct} of the sessions you start", { pct: pct(kpis.completionRate) }),
+      detail: kpis.completionRate >= 0.85 ? t("When you sit down, you tend to stay.") : t("If you often stop early, try a shorter focus length for a while."),
     });
   }
 
@@ -475,13 +486,24 @@ export function observations(
       Math.abs(diff) >= 0.1
         ? {
             id: "warmup",
-            title: `Sit-downs after a warm-up run ${pct(Math.abs(diff))} ${diff > 0 ? "longer" : "shorter"}`,
-            detail: `${fmtDur(wu.warm.avgMs)} on average after a warm-up (${wu.warm.count} times), against ${fmtDur(wu.cold.avgMs)} without (${wu.cold.count}). A pattern in your data, not proof of cause.`,
+            title: t(diff > 0 ? "Sit-downs after a warm-up run {pct} longer" : "Sit-downs after a warm-up run {pct} shorter", { pct: pct(Math.abs(diff)) }),
+            detail: t(
+              "{warm} on average after a warm-up ({warmCount} times), against {cold} without ({coldCount}). A pattern in your data, not proof of cause.",
+              {
+                warm: fmtDur(wu.warm.avgMs),
+                warmCount: wu.warm.count,
+                cold: fmtDur(wu.cold.avgMs),
+                coldCount: wu.cold.count,
+              },
+            ),
           }
         : {
             id: "warmup",
-            title: "Warm-up or not, you stay about as long",
-            detail: `${fmtDur(wu.warm.avgMs)} after a warm-up, ${fmtDur(wu.cold.avgMs)} without. Keep it if it makes starting easier.`,
+            title: t("Warm-up or not, you stay about as long"),
+            detail: t("{warm} after a warm-up, {cold} without. Keep it if it makes starting easier.", {
+              warm: fmtDur(wu.warm.avgMs),
+              cold: fmtDur(wu.cold.avgMs),
+            }),
           },
     );
   }
@@ -491,8 +513,8 @@ export function observations(
   if (mix.length > 1 && kpis.focusMs > 0) {
     out.push({
       id: "mix",
-      title: `${opts.activityName(mix[0].activityId)} takes ${pct(mix[0].ms / kpis.focusMs)} of your time`,
-      detail: `Followed by ${opts.activityName(mix[1].activityId)} at ${pct(mix[1].ms / kpis.focusMs)}.`,
+      title: t("{activity} takes {pct} of your time", { activity: opts.activityName(mix[0].activityId), pct: pct(mix[0].ms / kpis.focusMs) }),
+      detail: t("Followed by {activity} at {pct}.", { activity: opts.activityName(mix[1].activityId), pct: pct(mix[1].ms / kpis.focusMs) }),
     });
   }
 
@@ -508,8 +530,8 @@ export function observations(
     const d = new Date(gapEnd);
     out.push({
       id: "gap",
-      title: `Your longest break was ${gap} days`,
-      detail: `It ended on ${d.getDate()} ${d.toLocaleString("en", { month: "long" })}. Streaks matter less than coming back.`,
+      title: t("Your longest break was {days} days", { days: gap }),
+      detail: t("It ended on {date}. Streaks matter less than coming back.", { date: d.toLocaleDateString(localeTag(), { day: "numeric", month: "long" }) }),
     });
   }
 

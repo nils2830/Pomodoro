@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { Dialog } from "../ui/Dialog";
 import { config } from "../config";
+import { t as translate, useT } from "../i18n";
 
 /** Minimal shape of the parts of Stripe.js (Dahlia) the embedded form uses. */
 interface CheckoutFormSdk {
@@ -51,7 +52,7 @@ function loadStripeJs(): Promise<void> {
     s.onload = () => resolve();
     s.onerror = () => {
       loading = null;
-      reject(new Error("Couldn't load Stripe."));
+      reject(new Error(translate("Couldn't load Stripe.")));
     };
     document.head.appendChild(s);
   });
@@ -66,6 +67,7 @@ export const useCheckout = create<{ clientSecret: string | null; open(secret: st
 
 /** Stripe's embedded payment form in a dialog. On success Stripe sends the customer to the return URL. */
 export function CheckoutDialog() {
+  const t = useT();
   const clientSecret = useCheckout((s) => s.clientSecret);
   const close = useCheckout((s) => s.close);
   const host = useRef<HTMLDivElement>(null);
@@ -78,7 +80,7 @@ export function CheckoutDialog() {
     setError(null);
     (async () => {
       try {
-        if (!config.stripePublishableKey) throw new Error("Payments aren't fully set up yet.");
+        if (!config.stripePublishableKey) throw new Error(translate("Payments aren't fully set up yet."));
         await loadStripeJs();
         if (cancelled || !host.current || !window.Stripe) return;
         const checkout = window.Stripe(config.stripePublishableKey).initCheckoutFormSdk({ clientSecret, appearance: APPEARANCE });
@@ -95,7 +97,7 @@ export function CheckoutDialog() {
           }
         });
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Couldn't open checkout.");
+        if (!cancelled) setError(err instanceof Error ? err.message : translate("Couldn't open checkout."));
       }
     })();
     return () => {
@@ -105,7 +107,7 @@ export function CheckoutDialog() {
   }, [clientSecret]);
 
   return (
-    <Dialog open={clientSecret !== null} onClose={close} eyebrow="Steen Pro" title="Upgrade to Pro" size="md">
+    <Dialog open={clientSecret !== null} onClose={close} eyebrow="Steen Pro" title={t("Upgrade to Pro")} size="md">
       {error ? (
         <p className="py-6 text-[15px] text-bad">{error}</p>
       ) : (

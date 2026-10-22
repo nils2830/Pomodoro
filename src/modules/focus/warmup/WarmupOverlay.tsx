@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, ArrowUpRight, Flask } from "@phosphor-icons/react";
+import { useT } from "@/core/i18n";
 import { LogoMark } from "@/core/ui/Logo";
 import { useFocusSettings } from "../store/settings";
 import { useTasks } from "../store/data";
@@ -42,6 +43,7 @@ function WarmupScreen() {
   const tone = useFocusSettings((s) => s.doc.warmupTone);
   const reduce = useReducedMotion();
   const now = useNow(stage === "running");
+  const t = useT();
 
   const elapsed = stage === "running" && startedAt != null ? Math.max(0, now - startedAt) : 0;
   const phase = plan ? phaseAt(plan, elapsed) : null;
@@ -99,7 +101,7 @@ function WarmupScreen() {
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label="Focus warm-up"
+      aria-label={t("Focus warm-up")}
       className="fixed inset-0 z-[200] overflow-hidden text-[#e9e2d6] select-none"
       style={{ backgroundColor: SURFACE }}
       initial={{ opacity: 0 }}
@@ -119,14 +121,14 @@ function WarmupScreen() {
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-4 text-[13px] text-white/30 sm:p-6">
         <div className="flex items-center gap-2">
           <LogoMark size={15} />
-          <span className="eyebrow">{preview ? "Warm-up preview" : "Warm-up"}</span>
+          <span className="eyebrow">{preview ? t("Warm-up preview") : t("Warm-up")}</span>
         </div>
         <div className="flex items-center gap-1">
           <button type="button" onClick={cancel} className="rounded-full px-3 py-2 transition-colors hover:text-white/75">
-            Cancel
+            {t("Cancel")}
           </button>
           <button type="button" onClick={skip} className="inline-flex items-center gap-2 rounded-full px-3 py-2 transition-colors hover:text-white/75">
-            {preview ? "End" : "Skip to session"}
+            {preview ? t("End") : t("Skip to session")}
             <span className="hidden font-mono text-[10px] opacity-70 sm:inline">esc</span>
           </button>
         </div>
@@ -189,6 +191,7 @@ function Dot({ phaseId, reduce }: { phaseId: WarmupPhaseId; reduce: boolean }) {
 /** Instructions sit well above the dot and fade, so nothing competes with it. */
 function PhaseCopy({ phaseId, phaseElapsed, fixateMs }: { phaseId: WarmupPhaseId; phaseElapsed: number; fixateMs: number }) {
   const firstStep = useWarmup((s) => s.firstStep.trim());
+  const t = useT();
   const copy = PHASE_COPY[phaseId];
   const showCopy = phaseId === "open" || phaseElapsed < COPY_MS;
   const showTip = phaseId === "fixate" && fixateMs >= 40_000 && phaseElapsed >= FIXATE_TIP_AT_MS && phaseElapsed < FIXATE_TIP_AT_MS + COPY_MS;
@@ -207,8 +210,8 @@ function PhaseCopy({ phaseId, phaseElapsed, fixateMs }: { phaseId: WarmupPhaseId
               transition={{ duration: 1, ease: EASE }}
               className="mx-auto max-w-[34ch]"
             >
-              <p className="text-[17px] leading-snug font-light text-[#e9e2d6]/85 sm:text-[19px]">{line.text}</p>
-              {line.hint && <p className="mt-2 text-[13.5px] leading-relaxed text-[#e9e2d6]/45">{line.hint}</p>}
+              <p className="text-[17px] leading-snug font-light text-[#e9e2d6]/85 sm:text-[19px]">{t(line.text)}</p>
+              {line.hint && <p className="mt-2 text-[13.5px] leading-relaxed text-[#e9e2d6]/45">{t(line.hint)}</p>}
             </motion.div>
           )}
         </AnimatePresence>
@@ -223,7 +226,7 @@ function PhaseCopy({ phaseId, phaseElapsed, fixateMs }: { phaseId: WarmupPhaseId
             transition={{ duration: 1.1, delay: 0.4, ease: EASE }}
             className="absolute inset-x-0 top-[46%] -translate-y-1/2 px-6 text-center"
           >
-            <div className="eyebrow text-white/35">Now</div>
+            <div className="eyebrow text-white/35">{t("Now")}</div>
             <p className="display mx-auto mt-3 max-w-[22ch] text-[clamp(1.6rem,4vw,2.4rem)] leading-[1.05] text-[#f3eee6]">{firstStep}</p>
           </motion.div>
         )}
@@ -239,7 +242,8 @@ function FirstStep() {
   const begin = useWarmup((s) => s.begin);
   const seconds = useFocusSettings((s) => s.doc.warmupSeconds);
   const taskTitle = useTimer((s) => (s.activeTaskId ? useTasks.getState().items[s.activeTaskId]?.title : undefined));
-  const length = seconds >= 60 && seconds % 60 === 0 ? `${seconds / 60} min` : `${seconds} s`;
+  const t = useT();
+  const length = seconds >= 60 && seconds % 60 === 0 ? `${seconds / 60} min` : t("{seconds} s", { seconds });
 
   return (
     <motion.div
@@ -257,17 +261,17 @@ function FirstStep() {
           begin();
         }}
       >
-        <div className="eyebrow text-white/35">Before you start</div>
-        <h2 className="display mt-4 text-[clamp(1.9rem,5vw,2.8rem)] leading-[1.02] text-[#f3eee6]">What&apos;s the first small thing you&apos;ll do?</h2>
-        {taskTitle && <p className="mt-3 text-[14px] text-white/40">Up next: {taskTitle}</p>}
+        <div className="eyebrow text-white/35">{t("Before you start")}</div>
+        <h2 className="display mt-4 text-[clamp(1.9rem,5vw,2.8rem)] leading-[1.02] text-[#f3eee6]">{t("What's the first small thing you'll do?")}</h2>
+        {taskTitle && <p className="mt-3 text-[14px] text-white/40">{t("Up next: {title}", { title: taskTitle })}</p>}
         <label className="mt-9 block rounded-[22px] bg-white/[0.05] px-5 pt-3 pb-3.5 text-left ring-1 ring-white/10 transition-shadow focus-within:ring-white/30">
-          <span className="block text-[12.5px] text-white/40">When the timer starts, I&apos;ll…</span>
+          <span className="block text-[12.5px] text-white/40">{t("When the timer starts, I'll…")}</span>
           <input
             autoFocus
             value={firstStep}
             onChange={(e) => setFirstStep(e.target.value)}
             maxLength={140}
-            placeholder="open the notes and write one line"
+            placeholder={t("open the notes and write one line")}
             className="own-focus mt-1 w-full bg-transparent text-[17px] text-[#f3eee6] outline-none placeholder:text-white/20"
           />
         </label>
@@ -275,7 +279,7 @@ function FirstStep() {
           type="submit"
           className="group mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-[#f3eee6] px-6 text-[15px] font-medium text-[#12110f] transition-transform hover:-translate-y-px"
         >
-          Begin warm-up <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+          {t("Begin warm-up")} <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
         </button>
         <div>
           <button
@@ -286,10 +290,10 @@ function FirstStep() {
             }}
             className="mt-3 rounded-full px-3 py-1.5 text-[13px] text-white/35 transition-colors hover:text-white/70"
           >
-            Skip this step
+            {t("Skip this step")}
           </button>
         </div>
-        <p className="mt-10 text-[12.5px] text-white/25">{length} with a single dot · Blink whenever you like</p>
+        <p className="mt-10 text-[12.5px] text-white/25">{t("{length} with a single dot · Blink whenever you like", { length })}</p>
         <WhyThisWorks />
       </form>
     </motion.div>
@@ -299,6 +303,7 @@ function FirstStep() {
 /** What the research says, one tap away, so the ritual never feels like a black box. */
 function WhyThisWorks() {
   const [open, setOpen] = useState(false);
+  const t = useT();
   return (
     <div className="mt-3">
       <button
@@ -307,7 +312,7 @@ function WhyThisWorks() {
         aria-expanded={open}
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] text-white/40 ring-1 ring-white/10 transition-colors hover:text-white/75"
       >
-        <Flask size={13} weight="bold" /> {open ? "Hide the research" : "Why this works"}
+        <Flask size={13} weight="bold" /> {open ? t("Hide the research") : t("Why this works")}
       </button>
       <AnimatePresence initial={false}>
         {open && (
@@ -320,8 +325,8 @@ function WhyThisWorks() {
           >
             {WARMUP_EVIDENCE.map((e) => (
               <li key={e.title} className="rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/[0.07]">
-                <div className="text-[13.5px] font-medium text-[#f3eee6]">{e.title}</div>
-                <p className="mt-1 text-[12.5px] leading-relaxed text-white/50">{e.body}</p>
+                <div className="text-[13.5px] font-medium text-[#f3eee6]">{t(e.title)}</div>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-white/50">{t(e.body)}</p>
                 <a
                   href={e.url}
                   target="_blank"

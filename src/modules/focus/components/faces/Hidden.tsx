@@ -3,22 +3,24 @@
 import { useState } from "react";
 import { Eye } from "@phosphor-icons/react";
 import { formatClock, formatElapsed, formatDuration } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import type { FaceProps } from "./types";
 
 /** The timer is hidden. A breathing orb shows that time is moving; hold to peek. */
 export function Hidden(p: FaceProps) {
+  const t = useT();
   const [peek, setPeek] = useState(false);
   const isFlow = p.flow && p.mode === "focus";
   const label =
     p.status === "idle"
       ? isFlow
-        ? "Flow, hidden"
-        : `${formatDuration(p.plannedMs)}, hidden`
+        ? t("Flow, hidden")
+        : t("{duration}, hidden", { duration: formatDuration(p.plannedMs) })
       : p.status === "paused"
-        ? "Paused"
+        ? t("Paused")
         : p.mode === "focus"
-          ? "In focus"
-          : "On a break";
+          ? t("In focus")
+          : t("On a break");
 
   const on = () => setPeek(true);
   const off = () => setPeek(false);
@@ -48,7 +50,7 @@ export function Hidden(p: FaceProps) {
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium text-ink-3 select-none hover:bg-fill hover:text-ink"
           >
             <Eye size={15} weight="bold" />
-            Hold to peek
+            {t("Hold to peek")}
           </button>
         )}
       </div>

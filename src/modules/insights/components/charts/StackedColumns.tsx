@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatDuration, HOUR } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import { columnPath, niceMax, Tooltip, TooltipRow, useWidth } from "./shared";
 
 export interface Series {
@@ -23,6 +24,7 @@ const PAD = { top: 14, right: 4, bottom: 28, left: 40 };
 
 /** Stacked columns of focus time per bucket, one segment per activity. */
 export function StackedColumns({ columns, series }: { columns: Column[]; series: Series[] }) {
+  const t = useT();
   const [ref, width] = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
   const innerW = Math.max(0, width - PAD.left - PAD.right);
@@ -38,7 +40,7 @@ export function StackedColumns({ columns, series }: { columns: Column[]; series:
   return (
     <div ref={ref} className="relative w-full" onPointerLeave={() => setHover(null)}>
       {width > 0 && (
-        <svg width={width} height={H} role="img" aria-label="Focus time per period, stacked by activity">
+        <svg width={width} height={H} role="img" aria-label={t("Focus time per period, stacked by activity")}>
           {ticks.map((t) => {
             const ty = PAD.top + innerH - (t / maxH) * innerH;
             return (

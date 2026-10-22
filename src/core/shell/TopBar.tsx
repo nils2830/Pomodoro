@@ -10,6 +10,7 @@ import { useUI } from "../ui/store";
 import { usePlan } from "../billing/entitlements";
 import { useAuth } from "../auth/store";
 import { cn } from "../lib/cn";
+import { useT } from "../i18n";
 import { DailyGoal } from "./DailyGoal";
 import { ClientOnly } from "./ClientOnly";
 
@@ -20,14 +21,15 @@ export function isActive(pathname: string, href: string) {
 export function TopBar() {
   const pathname = usePathname();
   const openSettings = useUI((s) => s.openSettings);
+  const t = useT();
 
   return (
     <header className="relative z-20 mx-auto flex h-[72px] w-full max-w-[1320px] items-center gap-3 px-4 sm:px-6">
-      <Link href="/" aria-label="Steen home" className="mr-2 shrink-0 rounded-full">
+      <Link href="/" aria-label={t("Steen home")} className="mr-2 shrink-0 rounded-full">
         <Logo />
       </Link>
 
-      <nav aria-label="Modules" className="hidden items-center gap-1 md:flex">
+      <nav aria-label={t("Modules")} className="hidden items-center gap-1 md:flex">
         {MODULES.map((m) => {
           const active = isActive(pathname, m.href);
           const Icon = m.icon;
@@ -42,10 +44,10 @@ export function TopBar() {
               )}
             >
               <Icon size={17} weight={active ? "fill" : "bold"} />
-              {m.name}
+              {t(m.name)}
               {m.status === "soon" && (
                 <span className={cn("rounded-full px-1.5 py-px font-mono text-[9px] tracking-[0.1em] uppercase", active ? "bg-page/15" : "bg-fill text-ink-3")}>
-                  soon
+                  {t("soon")}
                 </span>
               )}
             </Link>
@@ -58,7 +60,7 @@ export function TopBar() {
           <DailyGoal />
           <PlanButton />
         </ClientOnly>
-        <IconButton label="Settings" onClick={() => openSettings()} size="md">
+        <IconButton label={t("Settings")} onClick={() => openSettings()} size="md">
           <GearSix size={20} weight="bold" />
         </IconButton>
         <ClientOnly fallback={<span className="size-10" />}>
@@ -72,6 +74,7 @@ export function TopBar() {
 function PlanButton() {
   const plan = usePlan();
   const pathname = usePathname();
+  const t = useT();
   if (plan === "pro" || pathname === "/pricing") return null;
   return (
     <Link
@@ -79,7 +82,7 @@ function PlanButton() {
       className="hidden h-10 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold text-ink transition-colors hover:bg-fill sm:inline-flex"
     >
       <Sparkle size={15} weight="fill" />
-      Go Pro
+      {t("Go Pro")}
     </Link>
   );
 }
@@ -89,6 +92,7 @@ function AccountButton() {
   const status = useAuth((s) => s.status);
   const isAdmin = useAuth((s) => s.isAdmin);
   const plan = usePlan();
+  const t = useT();
   const initial = user?.email?.[0]?.toUpperCase();
   if (status === "signedOut")
     return (
@@ -96,7 +100,7 @@ function AccountButton() {
         href="/login"
         className="inline-flex h-10 items-center rounded-full bg-ink px-4 text-sm font-semibold text-page transition-opacity hover:opacity-90"
       >
-        Sign in
+        {t("Sign in")}
       </Link>
     );
   return (
@@ -104,8 +108,8 @@ function AccountButton() {
       {isAdmin && (
         <Link
           href="/admin"
-          aria-label="Admin"
-          title="Admin"
+          aria-label={t("Admin")}
+          title={t("Admin")}
           className="grid size-10 place-items-center rounded-full text-ink-2 transition-colors hover:bg-fill hover:text-ink"
         >
           <ShieldCheck size={20} weight="bold" />
@@ -117,11 +121,12 @@ function AccountButton() {
 }
 
 function AccountLink({ initial, plan }: { initial?: string; plan: string }) {
+  const t = useT();
   return (
     <Link
       href="/account"
-      aria-label="Account"
-      title="Account"
+      aria-label={t("Account")}
+      title={t("Account")}
       className="relative grid size-10 place-items-center rounded-full text-ink-2 transition-colors hover:bg-fill hover:text-ink"
     >
       {initial ? (

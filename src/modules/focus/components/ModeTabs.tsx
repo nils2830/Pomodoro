@@ -4,6 +4,7 @@ import { Infinity as InfinityIcon } from "@phosphor-icons/react";
 import { Segmented } from "@/core/ui/Segmented";
 import { useCan } from "@/core/billing/entitlements";
 import { useUI, confirmAction } from "@/core/ui/store";
+import { useT } from "@/core/i18n";
 import { useTimer } from "../store/timer";
 import { elapsedOf } from "../engine/logic";
 
@@ -14,6 +15,7 @@ export function ModeTabs({ className }: { className?: string }) {
   const flow = useTimer((s) => s.flow);
   const canFlow = useCan("flow");
   const openUpgrade = useUI((s) => s.openUpgrade);
+  const tr = useT();
   const value: Tab = mode === "focus" && flow ? "flow" : mode;
 
   const go = async (tab: Tab) => {
@@ -21,9 +23,9 @@ export function ModeTabs({ className }: { className?: string }) {
     const t = useTimer.getState();
     if (t.status !== "idle" && elapsedOf(t, Date.now()) > 5000) {
       const ok = await confirmAction({
-        title: "Switch now?",
-        body: "The current session will end. Time spent so far is kept if it's over a minute.",
-        confirmLabel: "Switch",
+        title: tr("Switch now?"),
+        body: tr("The current session will end. Time spent so far is kept if it's over a minute."),
+        confirmLabel: tr("Switch"),
       });
       if (!ok) return;
       t.finish(false);
@@ -34,19 +36,19 @@ export function ModeTabs({ className }: { className?: string }) {
 
   return (
     <Segmented<Tab>
-      ariaLabel="Timer mode"
+      ariaLabel={tr("Timer mode")}
       className={className}
       value={value}
       onChange={go}
       onLocked={() => openUpgrade("flow")}
       options={[
-        { value: "focus", label: "Focus" },
+        { value: "focus", label: tr("Focus") },
         {
           value: "short",
           label: (
             <>
-              <span className="sm:hidden">Short</span>
-              <span className="hidden sm:inline">Short break</span>
+              <span className="sm:hidden">{tr("Short")}</span>
+              <span className="hidden sm:inline">{tr("Short break")}</span>
             </>
           ),
         },
@@ -54,12 +56,12 @@ export function ModeTabs({ className }: { className?: string }) {
           value: "long",
           label: (
             <>
-              <span className="sm:hidden">Long</span>
-              <span className="hidden sm:inline">Long break</span>
+              <span className="sm:hidden">{tr("Long")}</span>
+              <span className="hidden sm:inline">{tr("Long break")}</span>
             </>
           ),
         },
-        { value: "flow", label: "Flow", icon: <InfinityIcon size={15} weight="bold" />, locked: !canFlow, title: "Open-ended stopwatch" },
+        { value: "flow", label: tr("Flow"), icon: <InfinityIcon size={15} weight="bold" />, locked: !canFlow, title: tr("Open-ended stopwatch") },
       ]}
     />
   );

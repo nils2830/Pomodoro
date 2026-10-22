@@ -3,6 +3,7 @@
 import { type ReactNode, type SelectHTMLAttributes, type InputHTMLAttributes, forwardRef } from "react";
 import { CaretDown, Minus, Plus } from "@phosphor-icons/react";
 import { cn } from "../lib/cn";
+import { useT } from "../i18n";
 
 export function NumberField({
   value,
@@ -24,11 +25,12 @@ export function NumberField({
   className?: string;
 }) {
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
+  const t = useT();
   return (
     <div className={cn("inline-flex h-10 items-center rounded-full bg-fill", className)}>
       <button
         type="button"
-        aria-label={`Decrease ${label}`}
+        aria-label={t("Decrease {label}", { label })}
         onClick={() => onChange(clamp(value - step))}
         disabled={value <= min}
         className="grid size-10 place-items-center rounded-full text-ink-2 hover:text-ink disabled:opacity-30"
@@ -54,7 +56,7 @@ export function NumberField({
       </label>
       <button
         type="button"
-        aria-label={`Increase ${label}`}
+        aria-label={t("Increase {label}", { label })}
         onClick={() => onChange(clamp(value + step))}
         disabled={value >= max}
         className="grid size-10 place-items-center rounded-full text-ink-2 hover:text-ink disabled:opacity-30"

@@ -2,6 +2,7 @@
 
 import { Check, DotsSixVertical, PencilSimple } from "@phosphor-icons/react";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import type { Project, Task } from "../types";
 import { useTasks } from "../store/data";
 import { useTimer } from "../store/timer";
@@ -22,6 +23,7 @@ export function TaskItem({
   dropHint: "before" | "after" | null;
 }) {
   const setActive = useTimer((s) => s.setActiveTask);
+  const t = useT();
   return (
     <li
       {...dragProps}
@@ -40,7 +42,7 @@ export function TaskItem({
         type="button"
         role="checkbox"
         aria-checked={task.done}
-        aria-label={task.done ? "Mark as not done" : "Mark as done"}
+        aria-label={task.done ? t("Mark as not done") : t("Mark as done")}
         onClick={(e) => {
           e.stopPropagation();
           useTasks.getState().update(task.id, { done: !task.done });
@@ -67,7 +69,7 @@ export function TaskItem({
       </span>
       <button
         type="button"
-        aria-label={`Edit ${task.title}`}
+        aria-label={t("Edit {title}", { title: task.title })}
         onClick={(e) => {
           e.stopPropagation();
           onEdit();

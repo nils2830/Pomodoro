@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { formatDayLabel, monthShort } from "@/core/lib/date";
+import { useLocale, useT } from "@/core/i18n";
 import { formatDuration } from "@/core/lib/time";
 import type { HeatDay } from "../../analytics";
+import { formatDayLabel, monthShort } from "../../dates";
 import { Tooltip, useWidth } from "./shared";
 
 const STEPS = [0, 32, 56, 78, 100];
@@ -22,6 +23,8 @@ function thresholds(values: number[]): number[] {
 }
 
 export function YearHeatmap({ columns, weekdays }: { columns: HeatDay[][]; weekdays: string[] }) {
+  const t = useT();
+  const locale = useLocale();
   const [ref, width] = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<HeatDay | null>(null);
   const left = 30;
@@ -43,7 +46,7 @@ export function YearHeatmap({ columns, weekdays }: { columns: HeatDay[][]; weekd
   return (
     <div ref={ref} className="relative w-full overflow-hidden" onPointerLeave={() => setHover(null)}>
       {width > 0 && (
-        <svg width={Math.min(width, left + columns.length * step)} height={height} role="img" aria-label="Focus time per day over the last year">
+        <svg width={Math.min(width, left + columns.length * step)} height={height} role="img" aria-label={t("Focus time per day over the last year")}>
           {columns.map((col, w) => {
             const first = new Date(col[0].ts);
             const prev = w > 0 ? new Date(columns[w - 1][0].ts) : null;
@@ -52,7 +55,7 @@ export function YearHeatmap({ columns, weekdays }: { columns: HeatDay[][]; weekd
               <g key={w}>
                 {showMonth && w < columns.length - 2 && (
                   <text x={left + w * step} y={10} fontSize="11" fill="var(--c-ink-3)">
-                    {monthShort(first.getMonth())}
+                    {monthShort(locale, first.getMonth())}
                   </text>
                 )}
                 {col.map((d, i) =>
@@ -82,16 +85,16 @@ export function YearHeatmap({ columns, weekdays }: { columns: HeatDay[][]; weekd
         </svg>
       )}
       <div className="mt-3 flex items-center justify-end gap-1.5 text-[12px] text-ink-3">
-        Less
+        {t("Less")}
         {[0, 1, 2, 3, 4].map((l) => (
           <span key={l} className="size-3 rounded-[3px]" style={{ background: heatColor(l) }} />
         ))}
-        More
+        {t("More")}
       </div>
       {hover && (
         <Tooltip x={pos(hover).x} y={pos(hover).y} width={width}>
-          <div className="text-[15px] font-semibold tabular-nums">{hover.ms > 0 ? formatDuration(hover.ms) : "No focus"}</div>
-          <div className="text-[12px] text-ink-3">{formatDayLabel(hover.ts)}</div>
+          <div className="text-[15px] font-semibold tabular-nums">{hover.ms > 0 ? formatDuration(hover.ms) : t("No focus")}</div>
+          <div className="text-[12px] text-ink-3">{formatDayLabel(locale, hover.ts)}</div>
         </Tooltip>
       )}
     </div>

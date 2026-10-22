@@ -1,9 +1,11 @@
 import { MINUTE } from "@/core/lib/time";
 import { cn } from "@/core/lib/cn";
+import { useT } from "@/core/i18n";
 import type { FaceProps } from "./types";
 
 /** One dot per minute (or per few minutes for long sessions). Changes once a minute. */
 export function Dots(p: FaceProps) {
+  const t = useT();
   const plannedMin = Math.max(1, Math.round(p.plannedMs / MINUTE));
   const per = plannedMin <= 60 ? 1 : Math.ceil(plannedMin / 60);
   const count = Math.ceil(plannedMin / per);
@@ -27,7 +29,7 @@ export function Dots(p: FaceProps) {
           );
         })}
       </div>
-      <div className="text-[13px] text-ink-3">{per === 1 ? "one dot, one minute" : `one dot, ${per} minutes`}</div>
+      <div className="text-[13px] text-ink-3">{per === 1 ? t("one dot, one minute") : t("one dot, {count} minutes", { count: per })}</div>
     </div>
   );
 }

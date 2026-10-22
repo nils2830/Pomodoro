@@ -1,8 +1,10 @@
 import { formatTimeOfDay } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import type { FaceProps } from "./types";
 
 /** A sun crossing the sky over the session; breaks get a moon instead. */
 export function Sun(p: FaceProps) {
+  const tr = useT();
   const t = Math.min(1, Math.max(0, p.progress));
   const cx = 200;
   const cy = 200;
@@ -63,7 +65,7 @@ export function Sun(p: FaceProps) {
           <circle cx={x} cy={y} r="20" fill="var(--c-ink)" style={{ transition: "cx 1s linear, cy 1s linear" }} />
         )}
         <text x={cx - r} y={262} textAnchor="middle" fontSize="12" fill="var(--c-ink)" fillOpacity="0.55">
-          {p.startedAt ? formatTimeOfDay(p.startedAt, p.hourFormat) : "now"}
+          {p.startedAt ? formatTimeOfDay(p.startedAt, p.hourFormat) : tr("now")}
         </text>
         <text x={cx + r} y={262} textAnchor="middle" fontSize="12" fill="var(--c-ink)" fillOpacity="0.55">
           {formatTimeOfDay(endsAt, p.hourFormat)}

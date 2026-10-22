@@ -11,6 +11,7 @@ import { useSyncStatus } from "../data/SyncProvider";
 import { CAIRN_PATHS } from "../ui/Logo";
 import { usePlan, useProSource } from "./entitlements";
 import { FEATURES, PRO_HIGHLIGHTS } from "./plans";
+import { useT } from "../i18n";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const SLOW_MS = 30_000;
@@ -137,18 +138,19 @@ function Cairn({ settled }: { settled: boolean }) {
 }
 
 function Activating({ slow, onClose }: { slow: boolean; onClose: () => void }) {
+  const t = useT();
   return (
     <div className="relative w-full max-w-[460px] text-center">
       <Cairn settled={false} />
-      <h2 className="display mt-10 text-[34px] leading-none">Setting up Pro</h2>
+      <h2 className="display mt-10 text-[34px] leading-none">{t("Setting up Pro")}</h2>
       <p className="mt-4 text-[15px] leading-relaxed text-white/55">
         {slow
-          ? "Stripe is taking longer than usual. Pro switches on by itself the moment the payment is confirmed, so you can carry on."
-          : "Stripe is confirming your payment. This only takes a few seconds."}
+          ? t("Stripe is taking longer than usual. Pro switches on by itself the moment the payment is confirmed, so you can carry on.")
+          : t("Stripe is confirming your payment. This only takes a few seconds.")}
       </p>
       {slow && (
         <button type="button" onClick={onClose} className="mt-8 h-11 rounded-full px-6 text-[14px] text-white/70 ring-1 ring-white/15 hover:text-white">
-          Continue to Steen
+          {t("Continue to Steen")}
         </button>
       )}
     </div>
@@ -156,14 +158,15 @@ function Activating({ slow, onClose }: { slow: boolean; onClose: () => void }) {
 }
 
 function Celebrate({ source, onDone }: { source: ReturnType<typeof useProSource>; onDone: () => void }) {
+  const t = useT();
   const name = usePrefs((s) => s.doc.name);
   const owner = useAuth((s) => s.grant?.note === "Owner");
-  const title = name ? `Welcome to Pro, ${name}.` : "Welcome to Pro.";
+  const title = name ? t("Welcome to Pro, {name}.", { name }) : t("Welcome to Pro.");
   const subtitle = owner
-    ? "Owner access. Everything in Steen is unlocked, for good."
+    ? t("Owner access. Everything in Steen is unlocked, for good.")
     : source === "gift"
-      ? "You've been given Steen Pro. Everything is unlocked."
-      : "Thank you for supporting Steen. Everything is unlocked.";
+      ? t("You've been given Steen Pro. Everything is unlocked.")
+      : t("Thank you for supporting Steen. Everything is unlocked.");
 
   return (
     <div className="relative w-full max-w-[560px] text-center">
@@ -201,7 +204,7 @@ function Celebrate({ source, onDone }: { source: ReturnType<typeof useProSource>
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 2.05 + i * 0.07, duration: 0.6, ease: EASE }}
           >
-            <Check size={13} weight="bold" className="text-[#f1c9a2]" /> {FEATURES[f].label}
+            <Check size={13} weight="bold" className="text-[#f1c9a2]" /> {t(FEATURES[f].label)}
           </motion.li>
         ))}
       </ul>
@@ -214,7 +217,7 @@ function Celebrate({ source, onDone }: { source: ReturnType<typeof useProSource>
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2.6, duration: 0.7, ease: EASE }}
       >
-        Start exploring <ArrowRight size={16} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+        {t("Start exploring")} <ArrowRight size={16} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
       </motion.button>
     </div>
   );

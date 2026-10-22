@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { Pause, Play, SkipForward } from "@phosphor-icons/react";
 import { toast } from "@/core/ui/store";
 import { getTheme, modeVars } from "@/core/theme/themes";
+import { t, useT } from "@/core/i18n";
 import { useTimer } from "../store/timer";
 import { useFocusSettings } from "../store/settings";
 import { useFaceProps } from "../hooks";
@@ -17,6 +18,7 @@ interface DocumentPiP {
 }
 
 function MiniTimer() {
+  const t = useT();
   const face = useFaceProps("mini", 500);
   const toggle = useTimer((s) => s.toggle);
   const skip = useTimer((s) => s.skip);
@@ -27,13 +29,13 @@ function MiniTimer() {
   return (
     <div style={vars} className="flex h-svh flex-col bg-page p-4 font-sans text-ink">
       <div className="flex items-center justify-between">
-        <span className="eyebrow text-ink-2">{isFlow ? "Flow" : MODE_LABEL[face.mode]}</span>
+        <span className="eyebrow text-ink-2">{isFlow ? t("Flow") : t(MODE_LABEL[face.mode])}</span>
         <div className="flex gap-1">
-          <button type="button" onClick={toggle} aria-label="Start or pause" className="grid size-9 place-items-center rounded-full bg-ink/12">
+          <button type="button" onClick={toggle} aria-label={t("Start or pause")} className="grid size-9 place-items-center rounded-full bg-ink/12">
             {face.status === "running" ? <Pause size={16} weight="fill" /> : <Play size={16} weight="fill" />}
           </button>
           {!isFlow && (
-            <button type="button" onClick={skip} aria-label="Skip" className="grid size-9 place-items-center rounded-full bg-ink/12">
+            <button type="button" onClick={skip} aria-label={t("Skip")} className="grid size-9 place-items-center rounded-full bg-ink/12">
               <SkipForward size={16} weight="fill" />
             </button>
           )}
@@ -48,7 +50,7 @@ function MiniTimer() {
 export async function openPopout(): Promise<void> {
   const dpip = (window as unknown as { documentPictureInPicture?: DocumentPiP }).documentPictureInPicture;
   if (!dpip) {
-    toast({ message: "The pop-out timer needs a Chromium browser (Chrome, Edge, Arc).", tone: "error" });
+    toast({ message: t("The pop-out timer needs a Chromium browser (Chrome, Edge, Arc)."), tone: "error" });
     return;
   }
   if (dpip.window) {

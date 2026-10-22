@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { formatClock, formatDuration, MINUTE } from "@/core/lib/time";
 import { notify } from "@/core/lib/notify";
 import { toast } from "@/core/ui/store";
+import { t as tr } from "@/core/i18n";
 import { useTimer } from "../store/timer";
 import { useFocusSettings } from "../store/settings";
 import { useActivities } from "../store/data";
@@ -37,7 +38,7 @@ export function useTimerEngine() {
         const remaining = remainingOf(t, now);
         if (s.reminderMinutes > 0 && !t.reminderFired && remaining <= s.reminderMinutes * MINUTE && t.plannedMs > s.reminderMinutes * MINUTE) {
           useTimer.setState({ reminderFired: true });
-          if (s.notifications) notify(`${s.reminderMinutes} min left`, `${MODE_LABEL[t.mode]} ends soon.`);
+          if (s.notifications) notify(tr("{minutes} min left", { minutes: s.reminderMinutes }), tr("{mode} ends soon.", { mode: tr(MODE_LABEL[t.mode]) }));
         }
       }
 
@@ -45,10 +46,10 @@ export function useTimerEngine() {
       if (t.status === "idle" || !s.timeInTitle) {
         document.title = baseTitle;
       } else if (s.hideTimer) {
-        document.title = `${t.status === "paused" ? "Paused" : t.mode === "focus" ? "In focus" : "On a break"} · ${baseTitle}`;
+        document.title = `${t.status === "paused" ? tr("Paused") : t.mode === "focus" ? tr("In focus") : tr("On a break")} · ${baseTitle}`;
       } else {
         const clock = isFlow ? formatClock(elapsedOf(t, now)) : formatClock(remainingOf(t, now));
-        document.title = `${t.status === "paused" ? "❚❚ " : ""}${clock} · ${isFlow ? "Flow" : MODE_LABEL[t.mode]}`;
+        document.title = `${t.status === "paused" ? "❚❚ " : ""}${clock} · ${isFlow ? tr("Flow") : tr(MODE_LABEL[t.mode])}`;
       }
 
       // Ambient sound follows the running state.
@@ -89,15 +90,22 @@ export function useTimerEngine() {
       const activity = e.entry?.activityId ? useActivities.getState().items[e.entry.activityId] : null;
       if (e.mode === "focus") {
         if (e.entry) {
-          const what = activity ? ` of ${activity.name}` : "";
+          const vars = { duration: formatDuration(e.entry.durationMs), activity: activity?.name ?? "" };
           toast({
-            message: `${e.completed ? "Logged" : "Saved"} ${formatDuration(e.entry.durationMs)}${what}${e.completed ? "" : " (interrupted)"}.`,
+            message: e.completed
+              ? activity
+                ? tr("Logged {duration} of {activity}.", vars)
+                : tr("Logged {duration}.", vars)
+              : activity
+                ? tr("Saved {duration} of {activity} (interrupted).", vars)
+                : tr("Saved {duration} (interrupted).", vars),
             tone: "success",
           });
         }
-        if (e.completed && s.notifications) notify(e.flow ? "Nice flow." : "Focus complete", `Time for a ${e.next === "long" ? "long" : "short"} break.`);
+        if (e.completed && s.notifications)
+          notify(e.flow ? tr("Nice flow.") : tr("Focus complete"), e.next === "long" ? tr("Time for a long break.") : tr("Time for a short break."));
       } else if (e.completed && s.notifications) {
-        notify("Break's over", "Ready when you are.");
+        notify(tr("Break's over"), tr("Ready when you are."));
       }
     });
   }, []);

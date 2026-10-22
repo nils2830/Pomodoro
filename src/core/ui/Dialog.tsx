@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "@phosphor-icons/react";
 import { cn } from "../lib/cn";
 import { useHydrated } from "../lib/useHydrated";
+import { useT } from "../i18n";
 
 /**
  * Native <dialog> for focus trapping and Esc handling, portalled to <body>
@@ -32,6 +33,7 @@ export function Dialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const hydrated = useHydrated();
+  const t = useT();
 
   useEffect(() => {
     const el = ref.current;
@@ -73,7 +75,7 @@ export function Dialog({
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close"
+                  aria-label={t("Close")}
                   className="-mt-1 -mr-2 grid size-9 place-items-center rounded-full text-ink-3 hover:bg-fill hover:text-ink"
                 >
                   <X size={18} weight="bold" />

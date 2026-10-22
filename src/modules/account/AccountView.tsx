@@ -19,6 +19,7 @@ import { useSyncStatus } from "@/core/data/SyncProvider";
 import { useEntries } from "@/core/data/entries";
 import { selectFocus } from "@/modules/insights/analytics";
 import { formatDuration } from "@/core/lib/time";
+import { localeTag, useLocale, useT } from "@/core/i18n";
 
 function Row({ label, children, hint }: { label: string; children: React.ReactNode; hint?: React.ReactNode }) {
   return (
@@ -33,19 +34,21 @@ function Row({ label, children, hint }: { label: string; children: React.ReactNo
 }
 
 export function AccountView() {
+  const t = useT();
+  const lang = localeTag(useLocale());
   const { status, user, profile, grant, isAdmin } = useAuth();
   const plan = usePlan();
   const source = useProSource();
   const planHint =
     source === "subscription"
-      ? `${profile?.plan_status === "past_due" ? "Payment overdue. " : ""}Renews ${profile?.current_period_end ? new Date(profile.current_period_end).toLocaleDateString() : "automatically"}`
+      ? `${profile?.plan_status === "past_due" ? `${t("Payment overdue.")} ` : ""}${profile?.current_period_end ? t("Renews {date}", { date: new Date(profile.current_period_end).toLocaleDateString(lang) }) : t("Renews automatically")}`
       : source === "gift"
         ? grant?.expires_at
-          ? `A gift, active until ${new Date(grant.expires_at).toLocaleDateString()}`
-          : "A gift, no end date"
+          ? t("A gift, active until {date}", { date: new Date(grant.expires_at).toLocaleDateString(lang) })
+          : t("A gift, no end date")
         : source === "demo"
-          ? "Unlocked in demo mode"
-          : "Free: the timer, tasks and 7 days of insights.";
+          ? t("Unlocked in demo mode")
+          : t("Free: the timer, tasks and 7 days of insights.");
   const demoPro = usePrefs((s) => s.doc.demoPro);
   const displayName = usePrefs((s) => s.doc.name);
   const setPrefs = usePrefs((s) => s.set);
@@ -64,60 +67,62 @@ export function AccountView() {
 
   return (
     <div className="mx-auto w-full max-w-[880px] px-5 pt-10 pb-28 sm:pt-16">
-      <div className="eyebrow text-ink-3">Account</div>
+      <div className="eyebrow text-ink-3">{t("Account")}</div>
       <h1 className="display mt-4 text-[clamp(2.6rem,6vw,4.4rem)] leading-[0.88]">
-        {status === "signedIn" ? displayName || (user?.email ?? "Your account") : "You, on this device."}
+        {status === "signedIn" ? displayName || (user?.email ?? t("Your account")) : t("You, on this device.")}
       </h1>
       <p className="mt-4 text-[15px] text-ink-2">
-        {focus.length} sessions · {formatDuration(total)} focused since you started.
+        {t("{count} sessions · {time} focused since you started.", { count: focus.length, time: formatDuration(total) })}
       </p>
 
       <div className="mt-10 border-t border-ink/80">
-        <Row label="Plan" hint={planHint}>
-          <span className="rounded-full bg-ink px-3 py-1 font-mono text-[11px] tracking-[0.12em] text-page uppercase">{plan}</span>
+        <Row label={t("Plan")} hint={planHint}>
+          <span className="rounded-full bg-ink px-3 py-1 font-mono text-[11px] tracking-[0.12em] text-page uppercase">
+            {plan === "free" ? t("Free") : "Pro"}
+          </span>
           {plan === "free" && (
             <Link href="/pricing" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold hover:bg-fill">
-              <Sparkle size={14} weight="fill" /> Upgrade
+              <Sparkle size={14} weight="fill" /> {t("Upgrade")}
             </Link>
           )}
           {profile?.stripe_customer_id && (
             <Button size="sm" variant="outline" icon={<CreditCard size={14} weight="bold" />} onClick={openBillingPortal}>
-              Billing
+              {t("Billing")}
             </Button>
           )}
         </Row>
 
         {status === "disabled" && (
-          <Row label="Storage" hint="Accounts aren't configured on this deployment. Your data lives in this browser only.">
+          <Row label={t("Storage")} hint={t("Accounts aren't configured on this deployment. Your data lives in this browser only.")}>
             <HardDrives size={20} weight="bold" className="text-ink-3" />
           </Row>
         )}
 
         {status === "signedIn" && (
           <>
-            <Row label="Name" hint="What Steen calls you.">
+            <Row label={t("Name")} hint={t("What Steen calls you.")}>
               <input
                 defaultValue={displayName}
                 key={displayName}
                 maxLength={40}
-                placeholder="Your name"
-                aria-label="Your name"
+                placeholder={t("Your name")}
+                aria-label={t("Your name")}
                 onBlur={(e) => setPrefs({ name: e.target.value.trim(), nameAsked: true })}
                 onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                 className="h-9 w-48 rounded-full bg-fill px-4 text-[14px] ring-1 ring-line outline-none focus:ring-ink/40"
               />
             </Row>
-            <Row label="Signed in with" hint={providerLabel(user?.app_metadata?.provider)}>
+            <Row label={t("Signed in with")} hint={t(providerLabel(user?.app_metadata?.provider))}>
               <span className="text-[14px] text-ink-2">{user?.email}</span>
             </Row>
             <Row
-              label="Saved to your account"
+              label={t("Saved to your account")}
               hint={
                 sync.state === "error"
-                  ? `Last attempt failed: ${sync.error}`
+                  ? t("Last attempt failed: {error}", { error: String(sync.error) })
                   : sync.lastSyncedAt
-                    ? `Last saved ${new Date(sync.lastSyncedAt).toLocaleTimeString()}`
-                    : "Saving for the first time…"
+                    ? t("Last saved {time}", { time: new Date(sync.lastSyncedAt).toLocaleTimeString(lang) })
+                    : t("Saving for the first time…")
               }
             >
               {sync.state === "error" ? <CloudSlash size={20} weight="bold" className="text-bad" /> : <CloudCheck size={20} weight="bold" />}
@@ -127,39 +132,39 @@ export function AccountView() {
                 icon={<ArrowsClockwise size={14} weight="bold" className={sync.state === "syncing" ? "animate-spin" : ""} />}
                 onClick={sync.requestSync}
               >
-                Sync now
+                {t("Sync now")}
               </Button>
             </Row>
-            <Row label="Sign out" hint="Everything is saved to your account first, then cleared from this browser.">
+            <Row label={t("Sign out")} hint={t("Everything is saved to your account first, then cleared from this browser.")}>
               <Button size="sm" variant="outline" icon={<SignOut size={14} weight="bold" />} onClick={() => signOut()}>
-                Sign out
+                {t("Sign out")}
               </Button>
             </Row>
           </>
         )}
 
         {isAdmin && (
-          <Row label="Admin" hint="See members and give Pro to friends.">
+          <Row label={t("Admin")} hint={t("See members and give Pro to friends.")}>
             <Link href="/admin" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-semibold hover:bg-fill">
-              <ShieldCheck size={14} weight="bold" /> Open
+              <ShieldCheck size={14} weight="bold" /> {t("Open")}
             </Link>
           </Row>
         )}
 
-        <Row label="Backup & data" hint="Download, restore or erase what's stored here.">
+        <Row label={t("Backup & data")} hint={t("Download, restore or erase what's stored here.")}>
           <Button size="sm" variant="outline" onClick={() => openSettings("data")}>
-            Open
+            {t("Open")}
           </Button>
         </Row>
 
         {status === "signedIn" && (
-          <Row label="Delete account" hint="Ends any subscription and erases your sessions, tasks and settings for good.">
+          <Row label={t("Delete account")} hint={t("Ends any subscription and erases your sessions, tasks and settings for good.")}>
             <DeleteAccountButton />
           </Row>
         )}
 
         {config.demoProAllowed && !config.billingEnabled && (
-          <Row label="Demo Pro" hint="For development: unlocks Pro locally because billing isn't configured.">
+          <Row label="Demo Pro" hint={t("For development: unlocks Pro locally because billing isn't configured.")}>
             <Switch label="Demo Pro" checked={demoPro} onChange={(v) => setPrefs({ demoPro: v })} />
           </Row>
         )}
@@ -175,12 +180,13 @@ function providerLabel(provider: unknown): string {
 }
 
 function DeleteAccountButton() {
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const run = async () => {
     const ok = await confirmAction({
-      title: "Delete your account?",
-      body: "Your subscription ends now, and every session, task and setting is erased from Steen. This can't be undone.",
-      confirmLabel: "Delete account",
+      title: t("Delete your account?"),
+      body: t("Your subscription ends now, and every session, task and setting is erased from Steen. This can't be undone."),
+      confirmLabel: t("Delete account"),
       tone: "danger",
     });
     if (!ok) return;
@@ -193,7 +199,7 @@ function DeleteAccountButton() {
     if (!res?.ok) {
       const body = (await res?.json().catch(() => ({}))) as { error?: string } | undefined;
       setBusy(false);
-      toast({ message: body?.error ?? "Couldn't delete the account. Check your connection.", tone: "error" });
+      toast({ message: body?.error ?? t("Couldn't delete the account. Check your connection."), tone: "error" });
       return;
     }
     wipeLocalData();
@@ -201,7 +207,7 @@ function DeleteAccountButton() {
   };
   return (
     <Button size="sm" variant="outline" icon={<Trash size={14} weight="bold" />} onClick={run} disabled={busy}>
-      {busy ? "Deleting…" : "Delete"}
+      {busy ? t("Deleting…") : t("Delete")}
     </Button>
   );
 }

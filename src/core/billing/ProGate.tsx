@@ -6,12 +6,14 @@ import { useCan } from "./entitlements";
 import { useUI } from "../ui/store";
 import { FEATURES, type Feature } from "./plans";
 import { cn } from "../lib/cn";
+import { useT } from "../i18n";
 
 /**
  * Renders children for Pro users. For free users the children are shown
  * blurred and inert behind an unlock card, so the value is visible.
  */
 export function ProGate({ feature, children, className, compact }: { feature: Feature; children: ReactNode; className?: string; compact?: boolean }) {
+  const t = useT();
   const can = useCan(feature);
   const openUpgrade = useUI((s) => s.openUpgrade);
   if (can) return <>{children}</>;
@@ -34,10 +36,10 @@ export function ProGate({ feature, children, className, compact }: { feature: Fe
             <LockSimple size={18} weight="bold" />
           </span>
           <span>
-            <span className="block text-[15px] font-semibold">{f.label}</span>
-            {!compact && <span className="mt-0.5 block text-[13px] leading-snug text-ink-3">{f.detail}</span>}
+            <span className="block text-[15px] font-semibold">{t(f.label)}</span>
+            {!compact && <span className="mt-0.5 block text-[13px] leading-snug text-ink-3">{t(f.detail)}</span>}
             <span className="mt-1 block text-[13px] font-medium text-ink underline decoration-ink/30 underline-offset-4 group-hover:decoration-ink">
-              Unlock with Pro
+              {t("Unlock with Pro")}
             </span>
           </span>
         </button>
