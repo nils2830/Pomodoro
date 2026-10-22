@@ -5,18 +5,19 @@ import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { create } from "zustand";
+import { X } from "@phosphor-icons/react";
 import { usePrefs } from "@/core/prefs";
 import { useT } from "@/core/i18n";
 import { Button } from "@/core/ui/Button";
 
 const STEPS = [
-  { id: "timer", title: "Your timer", body: "This is where the session runs. You can change how the clock looks, or hide it completely and let the time run on its own." },
-  { id: "modes", title: "Focus and breaks", body: "Switch between focus, a short break and a long break. Next to them you pick what you're working on and the timer's face." },
-  { id: "controls", title: "Start", body: "Start, pause and skip here. Before a new sit-down, a short warm-up can help you settle first." },
-  { id: "tasks", title: "Tasks", body: "Write down what you want to get done and tick it off as you go." },
-  { id: "goal", title: "Today", body: "How much you've focused today, measured against your goal." },
-  { id: "nav", title: "Insights", body: "When and how long you focus, how often you get distracted, and what helps. It fills in as you use Steen." },
-  { id: "settings", title: "Settings", body: "Backgrounds, colours, warm-up, sounds and language. You can take this tour again from here." },
+  { id: "timer", title: "Timer", body: "Shows the time left in the session." },
+  { id: "modes", title: "Modes", body: "Choose focus or a break, the activity and the clock style." },
+  { id: "controls", title: "Start", body: "Starts, pauses or skips the session." },
+  { id: "tasks", title: "Tasks", body: "What you plan to do. Tick it off when done." },
+  { id: "goal", title: "Today", body: "Focus time today against your daily goal." },
+  { id: "nav", title: "Insights", body: "Your focus history and patterns." },
+  { id: "settings", title: "Settings", body: "Look, sounds, warm-up and language." },
 ];
 
 export const useTour = create<{ open: boolean; start(): void; stop(): void }>((set) => ({
@@ -24,6 +25,9 @@ export const useTour = create<{ open: boolean; start(): void; stop(): void }>((s
   start: () => set({ open: true }),
   stop: () => set({ open: false }),
 }));
+
+/** Unhurried, so the eye can follow the spotlight. */
+const EASE = { duration: 0.8, ease: [0.22, 1, 0.36, 1] } as const;
 
 type Rect = { top: number; left: number; width: number; height: number };
 const PAD = 10;
@@ -108,28 +112,25 @@ export function Tour() {
         {offer && !open && (
           <motion.div
             key="offer"
-            className="neutral fixed inset-x-3 bottom-24 z-[70] mx-auto max-w-[400px] rounded-[26px] bg-page p-5 text-ink shadow-[0_30px_80px_-30px_rgb(0_0_0/0.6)] ring-1 ring-line md:bottom-6"
-            initial={{ opacity: 0, y: 24 }}
+            className="neutral fixed right-3 bottom-24 z-[70] flex items-center gap-1 rounded-full bg-page py-1.5 pr-1.5 pl-4 text-ink shadow-[0_20px_50px_-24px_rgb(0_0_0/0.55)] ring-1 ring-line md:right-6 md:bottom-6"
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={EASE}
           >
-            <div className="text-[15px] font-medium">{t("New here? A quick look around")}</div>
-            <p className="mt-1 text-[13.5px] text-ink-3">{t("Seven short stops, about 30 seconds. You can skip it and find it later in settings.")}</p>
-            <div className="mt-4 flex gap-2">
-              <Button size="sm" onClick={() => useTour.getState().start()}>
-                {t("Show me")}
-              </Button>
-              <Button size="sm" variant="outline" onClick={finish}>
-                {t("No thanks")}
-              </Button>
-            </div>
+            <span className="mr-2 text-[13.5px] font-medium">{t("New here?")}</span>
+            <button type="button" onClick={() => useTour.getState().start()} className="h-8 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-page">
+              {t("Take the tour")}
+            </button>
+            <button type="button" onClick={finish} aria-label={t("No thanks")} className="grid size-8 place-items-center rounded-full text-ink-3 hover:bg-fill hover:text-ink">
+              <X size={13} weight="bold" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
       <AnimatePresence>
         {step && (
-          <motion.div key="tour" className="fixed inset-0 z-[90]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div key="tour" className="fixed inset-0 z-[90]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
             {/* Catches clicks so the page underneath stays still during the tour. */}
             <div className="absolute inset-0" onClick={() => setI((n) => (n + 1 < steps.length ? n + 1 : n))} />
             {rect && (
@@ -138,7 +139,7 @@ export function Tour() {
                 className="pointer-events-none absolute rounded-[26px] shadow-[0_0_0_200vmax_rgb(8_8_6/0.72)] ring-2 ring-white/70"
                 initial={false}
                 animate={rect}
-                transition={{ type: "spring", stiffness: 260, damping: 32 }}
+                transition={EASE}
               />
             )}
             <motion.div
@@ -148,15 +149,15 @@ export function Tour() {
               style={{ width: cardW }}
               initial={false}
               animate={{ top: cardTop, left: cardLeft }}
-              transition={{ type: "spring", stiffness: 260, damping: 32 }}
+              transition={EASE}
             >
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={step.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}>
+                <motion.div key={step.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.35, ease: "easeOut" }}>
                   <div className="eyebrow text-ink-3 tabular-nums">
                     {i + 1} / {steps.length}
                   </div>
                   <div className="mt-2 text-[17px] font-semibold tracking-[-0.01em]">{t(step.title)}</div>
-                  <p className="mt-1.5 text-[14px] leading-snug text-ink-2">{t(step.body)}</p>
+                  <p className="mt-1 text-[14px] leading-snug text-ink-2">{t(step.body)}</p>
                 </motion.div>
               </AnimatePresence>
               <div className="mt-4 flex items-center gap-2">
