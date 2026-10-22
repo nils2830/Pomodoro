@@ -1,7 +1,19 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { getAdminSupabase, getServerSupabase } from "@/core/auth/supabase-server";
 import { getStripe, priceFor, siteUrl } from "@/core/billing/stripe.server";
 import { isGrantActive } from "@/core/billing/grants";
+
+/** False when Stripe has deleted the customer or never had it. Other errors throw. */
+async function customerExists(stripe: Stripe, id: string): Promise<boolean> {
+  try {
+    const found = await stripe.customers.retrieve(id);
+    return !found.deleted;
+  } catch (err) {
+    if ((err as { code?: string }).code === "resource_missing") return false;
+    throw err;
+  }
+}
 
 /** Creates a Stripe Checkout session for the signed-in user. */
 export async function POST(req: Request) {
@@ -29,6 +41,8 @@ export async function POST(req: Request) {
   }
 
   let customer = profile?.stripe_customer_id as string | null | undefined;
+  // A customer deleted in Stripe can't check out again, so start a fresh one.
+  if (customer && !(await customerExists(stripe, customer))) customer = null;
   if (!customer) {
     const created = await stripe.customers.create({ email: user.email ?? undefined, metadata: { user_id: user.id } });
     customer = created.id;

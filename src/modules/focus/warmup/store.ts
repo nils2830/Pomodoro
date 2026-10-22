@@ -33,6 +33,8 @@ const elapsed = (s: WarmupState) => (s.startedAt == null ? 0 : Date.now() - s.st
 
 export const useWarmup = create<WarmupState>()((set, get) => {
   const close = (startFocus: boolean, warmupMs: number) => {
+    // Already closed: a late call (e.g. from the fading overlay) must not start anything.
+    if (get().stage === "closed") return;
     const preview = get().preview;
     set({ stage: "closed", plan: null, startedAt: null, preview: false });
     if (startFocus && !preview) useTimer.getState().startAfterWarmup(warmupMs);
@@ -49,13 +51,15 @@ export const useWarmup = create<WarmupState>()((set, get) => {
       unlockAudio();
       const s = useFocusSettings.getState().doc;
       set({ preview: Boolean(opts?.preview), firstStep: "", plan: planWarmup(s.warmupSeconds, s.warmupEyesClosed), startedAt: null });
-      if (s.warmupFirstStep) set({ stage: "intent" });
-      else get().begin();
+      set(s.warmupFirstStep ? { stage: "intent" } : { stage: "running", startedAt: Date.now() });
     },
 
     setFirstStep: (text) => set({ firstStep: text.slice(0, 140) }),
 
-    begin: () => set({ stage: "running", startedAt: Date.now() }),
+    // Only from the first-step screen, so its fading copy can't reopen a closed warm-up.
+    begin: () => {
+      if (get().stage === "intent") set({ stage: "running", startedAt: Date.now() });
+    },
 
     complete: () => close(true, get().plan?.totalMs ?? 0),
 

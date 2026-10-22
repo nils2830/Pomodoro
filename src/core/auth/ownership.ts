@@ -5,7 +5,9 @@
  * one in "steen:owner"; if a different person signs in on the same device,
  * the previous person's local copy is cleared before anything can sync.
  */
-const OWNER_KEY = "steen:owner";
+export const OWNER_KEY = "steen:owner";
+/** Sync keeps one cursor key per account: steen:sync-cursors:<userId>. */
+export const CURSOR_PREFIX = "steen:sync-cursors:";
 const PRESERVE = new Set<string>([]);
 
 function read(): string | null {
@@ -13,6 +15,30 @@ function read(): string | null {
     return localStorage.getItem(OWNER_KEY);
   } catch {
     return null;
+  }
+}
+
+/**
+ * Data from before owners were recorded (moved over from "cadence:" keys)
+ * has no owner key, but its sync cursors name the account it synced with.
+ */
+function otherCursorOwner(userId: string): string | null {
+  try {
+    const ids = Object.keys(localStorage)
+      .filter((k) => k.startsWith(CURSOR_PREFIX))
+      .map((k) => k.slice(CURSOR_PREFIX.length));
+    return ids.find((id) => id && id !== userId) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Whether this browser's local data belongs to userId right now. */
+export function ownsLocalData(userId: string): boolean {
+  try {
+    return localStorage.getItem(OWNER_KEY) === userId;
+  } catch {
+    return true; // no storage, so nothing local to mix up
   }
 }
 
@@ -33,7 +59,7 @@ export function wipeLocalData(): void {
  * account's data; the caller should then reload so stores start empty.
  */
 export function claimLocalData(userId: string): "ok" | "switched" {
-  const owner = read();
+  const owner = read() ?? otherCursorOwner(userId);
   if (owner === userId) return "ok";
   if (owner && owner !== userId) {
     wipeLocalData();

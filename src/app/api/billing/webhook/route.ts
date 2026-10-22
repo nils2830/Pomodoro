@@ -17,9 +17,19 @@ async function applySubscription(sub: Stripe.Subscription) {
   if (!admin) throw new Error("Supabase service role is not configured.");
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const userId = sub.metadata?.user_id;
+  const active = ACTIVE.has(sub.status);
+
+  // With more than one subscription, an old one ending mustn't downgrade the current one.
+  if (!active) {
+    const read = admin.from("profiles").select("plan, stripe_subscription_id");
+    const { data: profile, error } = userId ? await read.eq("id", userId).maybeSingle() : await read.eq("stripe_customer_id", customer).maybeSingle();
+    if (error) throw error;
+    if (profile?.plan === "pro" && profile.stripe_subscription_id && profile.stripe_subscription_id !== sub.id) return;
+  }
+
   const interval = sub.items.data[0]?.price.recurring?.interval;
   const patch = {
-    plan: ACTIVE.has(sub.status) ? "pro" : "free",
+    plan: active ? "pro" : "free",
     plan_status: sub.status,
     plan_interval: interval === "year" || interval === "month" ? interval : null,
     current_period_end: periodEnd(sub),
@@ -61,8 +71,12 @@ export async function POST(req: Request) {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         // Events can arrive out of order, so read the subscription as it is now.
+        // Only a subscription Stripe no longer has falls back to the payload; other errors retry.
         const sent = event.data.object;
-        const current = await stripe.subscriptions.retrieve(sent.id).catch(() => sent);
+        const current = await stripe.subscriptions.retrieve(sent.id).catch((err: unknown) => {
+          if ((err as { code?: string }).code === "resource_missing") return sent;
+          throw err;
+        });
         await applySubscription(current);
         break;
       }

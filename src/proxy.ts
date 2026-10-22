@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { isAuthPage, isPublicPath } from "@/core/auth/routes";
+import { isAuthRetryableFetchError } from "@supabase/supabase-js";
+import { isAuthPage, isPublicPath, safeNext } from "@/core/auth/routes";
 
 /**
  * Runs before every page request:
@@ -33,7 +34,9 @@ export async function proxy(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
   // If Supabase itself is unreachable, don't lock people out; the client re-checks.
-  const authDown = !user && error && (error.status === undefined || error.status >= 500) && error.name !== "AuthSessionMissingError";
+  // A network failure comes back as a retryable error with status 0.
+  const authDown =
+    !user && !!error && error.name !== "AuthSessionMissingError" && (isAuthRetryableFetchError(error) || error.status === undefined || error.status >= 500);
 
   const redirect = (to: URL) => {
     const res = NextResponse.redirect(to);
@@ -47,8 +50,7 @@ export async function proxy(request: NextRequest) {
     return redirect(to);
   }
   if (user && isAuthPage(pathname)) {
-    const next = request.nextUrl.searchParams.get("next");
-    return redirect(new URL(next && next.startsWith("/") && !next.startsWith("//") ? next : "/", request.url));
+    return redirect(new URL(safeNext(request.nextUrl.searchParams.get("next")), request.url));
   }
   return response;
 }

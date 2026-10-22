@@ -5,7 +5,7 @@ import { config } from "../config";
 import { getSupabase } from "./supabase-browser";
 import { useAuth, type Profile } from "./store";
 import type { ProGrant } from "../billing/grants";
-import { claimLocalData, wipeLocalData } from "./ownership";
+import { OWNER_KEY, claimLocalData, ownsLocalData, wipeLocalData } from "./ownership";
 import { syncNow } from "../data/sync";
 
 async function loadAccount(userId: string): Promise<{ profile: Profile | null; grant: ProGrant | null }> {
@@ -56,9 +56,26 @@ export function AuthProvider() {
     // keeps working while Supabase is unreachable. The proxy verifies the
     // session on the server for every page load.
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
+      const user = session?.user ?? null;
+      // A tab never switches accounts in place: its stores hold the current
+      // account's data. Another tab signing in as someone else lands here.
+      const current = useAuth.getState().user;
+      if (user && current && user.id !== current.id) {
+        window.location.reload();
+        return;
+      }
       if (event === "TOKEN_REFRESHED") return;
-      apply(session?.user ?? null);
+      apply(user);
     });
+
+    // Another tab took the local data for a different account, or signed
+    // out and cleared it. Reload so this tab doesn't keep or re-save it.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== OWNER_KEY && e.key !== null) return;
+      const user = useAuth.getState().user;
+      if (user && !ownsLocalData(user.id)) window.location.reload();
+    };
+    window.addEventListener("storage", onStorage);
 
     // Plans change through the Stripe webhook or an admin grant; refresh when the tab returns.
     const onFocus = () => {
@@ -70,6 +87,7 @@ export function AuthProvider() {
     return () => {
       cancelled = true;
       sub.subscription.unsubscribe();
+      window.removeEventListener("storage", onStorage);
       window.removeEventListener("focus", onFocus);
     };
   }, []);

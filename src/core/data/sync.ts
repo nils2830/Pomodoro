@@ -1,6 +1,8 @@
 "use client";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "../auth/supabase-browser";
+import { CURSOR_PREFIX, ownsLocalData } from "../auth/ownership";
 import { getSyncables, type BaseRecord } from "./record";
 
 /**
@@ -18,7 +20,7 @@ type Cursors = Record<string, { pulled: number; pushed: number }>;
 
 export type SyncStatus = { state: "idle" | "syncing" | "error"; lastSyncedAt: number | null; error?: string };
 
-const cursorKey = (userId: string) => `steen:sync-cursors:${userId}`;
+const cursorKey = (userId: string) => `${CURSOR_PREFIX}${userId}`;
 
 function readCursors(userId: string): Cursors {
   try {
@@ -40,10 +42,42 @@ interface Row {
 }
 
 const PAGE = 1000;
+/** The database rejects bigger records (0004_record_limits.sql); skip them so the rest still syncs. */
+const MAX_RECORD_CHARS = 200_000;
+/** sessionStorage: when this tab last reloaded over ownership, so a stuck owner key can't loop. */
+const RELOAD_GUARD = "steen:owner-reload";
+
+function reloadOnce(): never {
+  const reason = "This browser's data doesn't match the signed-in account.";
+  try {
+    const last = Number(sessionStorage.getItem(RELOAD_GUARD) ?? 0);
+    if (Date.now() - last < 30_000) throw new Error(reason);
+    sessionStorage.setItem(RELOAD_GUARD, String(Date.now()));
+  } catch {
+    // Reloaded moments ago, or can't record that: stop syncing instead of looping.
+    throw new Error(reason);
+  }
+  window.location.reload();
+  throw new Error(reason);
+}
+
+/**
+ * The session lives in cookies shared by every tab, so another tab can sign
+ * in as someone else without this one hearing about it. Before taking in or
+ * sending anything, check that the session and the local data still belong
+ * to userId; if not, reload so this tab starts over with the right account.
+ */
+async function ensureOwner(sb: SupabaseClient, userId: string): Promise<void> {
+  const { data, error } = await sb.auth.getSession();
+  if (error) throw error; // can't tell right now (e.g. offline); try next round
+  if (data.session?.user.id === userId && ownsLocalData(userId)) return;
+  reloadOnce();
+}
 
 export async function syncNow(userId: string): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
+  await ensureOwner(sb, userId);
   const cursors = readCursors(userId);
 
   for (const s of getSyncables()) {
@@ -62,6 +96,7 @@ export async function syncNow(userId: string): Promise<void> {
       if (error) throw error;
       const rows = (data ?? []) as Row[];
       if (rows.length) {
+        await ensureOwner(sb, userId);
         s.applyRemote(rows.map((r) => r.data));
         from = rows[rows.length - 1].seq;
       }
@@ -71,8 +106,14 @@ export async function syncNow(userId: string): Promise<void> {
 
     // Push local changes.
     const changed = s.changedSince(cur.pushed);
-    for (let i = 0; i < changed.length; i += PAGE) {
-      const chunk = changed.slice(i, i + PAGE);
+    const fits = changed.filter((r) => {
+      const ok = JSON.stringify(r).length <= MAX_RECORD_CHARS;
+      if (!ok) console.warn(`[sync] ${s.name}/${r.id} is too large to sync and stays on this device.`);
+      return ok;
+    });
+    for (let i = 0; i < fits.length; i += PAGE) {
+      const chunk = fits.slice(i, i + PAGE);
+      await ensureOwner(sb, userId);
       const { error } = await sb.from("records").upsert(
         chunk.map((r) => ({
           user_id: userId,

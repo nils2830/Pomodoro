@@ -67,7 +67,8 @@ function WarmupScreen() {
   // Esc leaves the warm-up and starts the session; the page underneath stays still.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      // Still listening while the overlay fades out; by then there is nothing to skip.
+      if (e.key !== "Escape" || useWarmup.getState().stage === "closed") return;
       e.preventDefault();
       e.stopPropagation();
       useWarmup.getState().skip();
@@ -135,7 +136,14 @@ function WarmupScreen() {
         {stage === "intent" ? (
           <FirstStep key="intent" />
         ) : (
-          <motion.div key="gaze" className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: fade(0.8) }}>
+          <motion.div
+            key="gaze"
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: fade(0.8) }}
+          >
             <PhaseCopy phaseId={phaseId} phaseElapsed={phase ? elapsed - phase.startMs : 0} fixateMs={plan ? phaseLength(plan, "fixate") : 0} />
             <Dot phaseId={phaseId} reduce={Boolean(reduce)} />
           </motion.div>
@@ -168,7 +176,10 @@ function Dot({ phaseId, reduce }: { phaseId: WarmupPhaseId; reduce: boolean }) {
         animate={breathe ? { scale: [1, 1.04, 1] } : { scale: 1 }}
         transition={breathe ? { duration: 6, repeat: Infinity, ease: "easeInOut" } : { duration: 1 }}
       >
-        <span className="absolute size-[36px] rounded-full opacity-[0.14] sm:size-[45px]" style={{ background: `radial-gradient(closest-side, ${DOT}, transparent)` }} />
+        <span
+          className="absolute size-[36px] rounded-full opacity-[0.14] sm:size-[45px]"
+          style={{ background: `radial-gradient(closest-side, ${DOT}, transparent)` }}
+        />
         <span className="size-[14px] rounded-full sm:size-[18px]" style={{ backgroundColor: DOT }} />
       </motion.div>
     </motion.div>
