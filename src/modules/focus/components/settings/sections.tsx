@@ -52,6 +52,9 @@ export function TimerSection() {
         <Field label={t("Start breaks automatically")}>
           <Switch label={t("Start breaks automatically")} checked={s.autoStartBreaks} onChange={(v) => set({ autoStartBreaks: v })} />
         </Field>
+        <Field label={t("Ask about distractions")} hint={t("After each focus session, a quick question. The answers show up in Insights.")}>
+          <Switch label={t("Ask about distractions")} checked={s.askDistractions} onChange={(v) => set({ askDistractions: v })} />
+        </Field>
         <Field label={t("Start focus automatically")} hint={t("After a break ends.")}>
           <Switch label={t("Start focus automatically")} checked={s.autoStartFocus} onChange={(v) => set({ autoStartFocus: v })} />
         </Field>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CaretDown, CheckCircle, Gift, MagnifyingGlass, PencilSimple, ShieldCheck, Trash, WarningCircle, XCircle } from "@phosphor-icons/react";
+import { CaretDown, CheckCircle, DownloadSimple, Gift, Megaphone, MagnifyingGlass, PencilSimple, ShieldCheck, Trash, WarningCircle, XCircle } from "@phosphor-icons/react";
 import { Button } from "@/core/ui/Button";
 import { Segmented } from "@/core/ui/Segmented";
 import { TextInput } from "@/core/ui/fields";
@@ -86,6 +86,7 @@ function AdminPanel() {
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const loadGrants = useCallback(async () => {
     const body = await api<{ grants: GrantRow[] }>("/api/admin/grants");
@@ -178,7 +179,9 @@ function AdminPanel() {
         ))}
       </div>
 
+      <Overview />
       <LaunchChecklist />
+      <AnnouncementEditor />
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[400px_1fr]">
         <section className="self-start rounded-[28px] bg-surface p-6 sm:p-7">
@@ -274,6 +277,10 @@ function AdminPanel() {
 
           <div className="mt-14 flex flex-wrap items-end justify-between gap-3">
             <h2 className="display text-[24px] leading-none">Accounts</h2>
+            <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" icon={<DownloadSimple size={14} weight="bold" />} onClick={() => exportCsv(users)} disabled={!users.length}>
+              CSV
+            </Button>
             <label className="relative">
               <MagnifyingGlass size={15} weight="bold" className="absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-3" />
               <TextInput
@@ -284,6 +291,7 @@ function AdminPanel() {
                 aria-label="Search accounts"
               />
             </label>
+            </div>
           </div>
           <ul className="mt-4 border-t border-line">
             {users.map((u) => {
@@ -291,10 +299,13 @@ function AdminPanel() {
               const label = u.plan === "pro" ? `Paying · ${u.plan_interval === "year" ? "yearly" : "monthly"}` : isGrantActive(g) ? "Gifted Pro" : "Free";
               return (
                 <li key={u.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px]">{u.email ?? "(no email)"}</div>
+                  <button type="button" onClick={() => setOpenId(openId === u.id ? null : u.id)} aria-expanded={openId === u.id} className="min-w-0 flex-1 text-left">
+                    <div className="flex items-center gap-1.5 truncate text-[15px]">
+                      {u.email ?? "(no email)"}
+                      <CaretDown size={11} weight="bold" className={cn("shrink-0 text-ink-3 transition-transform", openId === u.id && "rotate-180")} />
+                    </div>
                     <div className="text-[12.5px] text-ink-3">Joined {fmtDate(u.created_at)}</div>
-                  </div>
+                  </button>
                   <span className="text-[13px] text-ink-2">{label}</span>
                   {u.email && u.plan !== "pro" && !isGrantActive(g) && (
                     <Button
@@ -308,6 +319,15 @@ function AdminPanel() {
                     >
                       Give Pro
                     </Button>
+                  )}
+                  {openId === u.id && (
+                    <UserDetail
+                      user={u}
+                      onDeleted={() => {
+                        setOpenId(null);
+                        loadUsers(query).catch(() => {});
+                      }}
+                    />
                   )}
                 </li>
               );
@@ -379,6 +399,199 @@ function LaunchChecklist() {
           ))}
         </div>
       )}
+    </section>
+  );
+}
+
+function exportCsv(users: UserRow[]) {
+  const cell = (v: string | null) => `"${(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [["email", "plan", "interval", "status", "joined"], ...users.map((u) => [u.email, u.plan, u.plan_interval, u.plan_status, u.created_at])];
+  const url = URL.createObjectURL(new Blob([rows.map((r) => r.map(cell).join(",")).join("\n")], { type: "text/csv" }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: `steen-accounts-${new Date().toISOString().slice(0, 10)}.csv` });
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+interface Stats {
+  signups7: number;
+  signups30: number;
+  active1: number;
+  active7: number;
+  active30: number;
+  sessions7: number;
+  focusHours7: number;
+  monthly: number;
+  yearly: number;
+  mrr: number;
+  signupsByDay: { day: string; n: number }[];
+}
+
+/** Growth, activity and revenue at a glance. Active means at least one focus session in the period. */
+function Overview() {
+  const [s, setS] = useState<Stats | null>(null);
+  useEffect(() => {
+    api<Stats>("/api/admin/stats").then(setS, () => {});
+  }, []);
+  if (!s) return null;
+
+  const days = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(Date.now() - (29 - i) * 86_400_000).toISOString().slice(0, 10);
+    return { day: d, n: s.signupsByDay.find((x) => x.day === d)?.n ?? 0 };
+  });
+  const max = Math.max(1, ...days.map((d) => d.n));
+  const cells: [string, string | number, string][] = [
+    ["Active today", s.active1, `${s.active7} this week, ${s.active30} this month`],
+    ["Sessions, 7 days", s.sessions7, `${s.focusHours7} hours of focus`],
+    ["New accounts", s.signups7, `this week, ${s.signups30} in 30 days`],
+    ["MRR", `$${s.mrr.toFixed(2)}`, `${s.monthly} monthly, ${s.yearly} yearly`],
+  ];
+  return (
+    <section className="mt-10 grid gap-6 rounded-[28px] bg-surface p-6 sm:p-7 lg:grid-cols-[1.4fr_1fr] lg:items-end">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+        {cells.map(([label, value, sub]) => (
+          <div key={label}>
+            <div className="eyebrow text-ink-3">{label}</div>
+            <div className="mt-2.5 text-[clamp(1.6rem,3vw,2.2rem)] leading-none font-semibold tracking-[-0.03em] tabular-nums">{value}</div>
+            <div className="mt-1.5 text-[12.5px] text-ink-3">{sub}</div>
+          </div>
+        ))}
+      </div>
+      <div>
+        <div className="eyebrow mb-3 text-ink-3">Sign-ups, last 30 days</div>
+        <div className="flex h-28 items-end gap-[3px]">
+          {days.map((d) => (
+            <div
+              key={d.day}
+              title={`${fmtDate(d.day)}: ${d.n}`}
+              className="flex-1 rounded-t-[3px] bg-ink/70"
+              style={{ height: `${Math.max(3, (d.n / max) * 100)}%`, opacity: d.n ? 1 : 0.2 }}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+interface Detail {
+  lastSignInAt: string | null;
+  confirmedAt: string | null;
+  providers: string[];
+  usage: { sessions: number; focusHours: number; lastSession: number | null };
+}
+
+function UserDetail({ user, onDeleted }: { user: UserRow; onDeleted: () => void }) {
+  const [d, setD] = useState<Detail | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    api<Detail>(`/api/admin/users/${user.id}`).then(setD, (e: Error) => setError(e.message));
+  }, [user.id]);
+
+  const remove = async () => {
+    const ok = await confirmAction({
+      title: `Delete ${user.email ?? "this account"}?`,
+      body: "Their account, sessions, tasks and settings are deleted for good. This can't be undone.",
+      confirmLabel: "Delete account",
+      tone: "danger",
+    });
+    if (!ok) return;
+    try {
+      await api(`/api/admin/users/${user.id}`, { method: "DELETE" });
+      toast({ message: `${user.email ?? "Account"} deleted.`, tone: "success" });
+      onDeleted();
+    } catch (e) {
+      toast({ message: (e as Error).message, tone: "error" });
+    }
+  };
+
+  const rows: [string, string][] = d
+    ? [
+        ["Signs in with", d.providers.join(", ") || "email"],
+        ["Last sign-in", d.lastSignInAt ? new Date(d.lastSignInAt).toLocaleString() : "never"],
+        ["Focus sessions", `${d.usage.sessions} · ${d.usage.focusHours} h`],
+        ["Last session", d.usage.lastSession ? new Date(Number(d.usage.lastSession)).toLocaleString() : "none yet"],
+        ...(user.current_period_end ? [["Renews or ends", fmtDate(user.current_period_end)] as [string, string]] : []),
+      ]
+    : [];
+  return (
+    <div className="mt-2 mb-1 basis-full rounded-[18px] bg-fill p-4">
+      {error ? (
+        <p className="text-[13px] text-bad">{error}</p>
+      ) : !d ? (
+        <p className="text-[13px] text-ink-3">Loading…</p>
+      ) : (
+        <dl className="grid gap-x-6 gap-y-2 text-[13.5px] sm:grid-cols-2">
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex justify-between gap-3 sm:block">
+              <dt className="text-ink-3">{k}</dt>
+              <dd className="sm:mt-0.5">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <div className="mt-4 flex justify-end">
+        <Button size="sm" variant="outline" icon={<Trash size={14} weight="bold" />} onClick={remove}>
+          Delete account
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** One message shown to everyone in the app until they close it. */
+function AnnouncementEditor() {
+  const [message, setMessage] = useState("");
+  const [active, setActive] = useState(false);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    api<{ message: string; active: boolean }>("/api/admin/announcement").then((a) => {
+      setMessage(a.message);
+      setActive(a.active);
+    }, () => {});
+  }, []);
+
+  const save = async (nextActive: boolean) => {
+    setBusy(true);
+    try {
+      await api("/api/admin/announcement", { method: "POST", body: JSON.stringify({ message, active: nextActive }) });
+      setActive(nextActive);
+      toast({ message: nextActive ? "Announcement is live." : "Announcement hidden.", tone: "success" });
+    } catch (e) {
+      toast({ message: (e as Error).message, tone: "error" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="mt-6 rounded-[28px] bg-surface p-6 sm:p-7">
+      <div className="flex items-center gap-2">
+        <Megaphone size={20} weight="bold" />
+        <h2 className="display text-[24px] leading-none">Announcement</h2>
+        <span className={cn("ml-auto rounded-full px-2.5 py-1 text-[12px] font-medium", active ? "bg-good/15 text-good" : "bg-fill text-ink-3")}>
+          {active ? "Live" : "Off"}
+        </span>
+      </div>
+      <p className="mt-2 text-[13.5px] text-ink-3">A short note at the top of the app for every member, until they close it. Saving a new text shows it again to everyone.</p>
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        maxLength={280}
+        rows={2}
+        placeholder="New: log distractions after each session and see them in Insights."
+        className="mt-4 w-full resize-none bg-fill px-4 py-3 text-[14.5px] ring-1 ring-line outline-none"
+      />
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button size="sm" onClick={() => save(true)} disabled={busy || !message.trim()}>
+          {active ? "Update" : "Publish"}
+        </Button>
+        {active && (
+          <Button size="sm" variant="outline" onClick={() => save(false)} disabled={busy}>
+            Hide
+          </Button>
+        )}
+        <span className="ml-auto text-[12px] text-ink-3 tabular-nums">{message.length}/280</span>
+      </div>
     </section>
   );
 }

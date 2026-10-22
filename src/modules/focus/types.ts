@@ -79,4 +79,6 @@ export interface FocusSettings {
   /** Ask for the first small step before the warm-up. */
   warmupFirstStep: boolean;
   warmupTone: boolean;
+  /** After focus sessions, ask how often you got distracted. */
+  askDistractions: boolean;
 }

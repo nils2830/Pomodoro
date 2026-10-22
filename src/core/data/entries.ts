@@ -32,6 +32,10 @@ export interface Entry extends BaseRecord {
   note?: string;
   /** Length of the warm-up that led into this focus session, if any. */
   warmupMs?: number | null;
+  /** Times the person noted they got distracted during the session; absent when not logged. */
+  distractions?: number | null;
+  /** Roughly how many minutes those distractions took. */
+  distractedMin?: number | null;
 }
 
 export const useEntries = createCollection<Entry>("entries");

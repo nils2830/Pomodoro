@@ -28,6 +28,8 @@ export function EntryDialog({ open, onClose, entry }: { open: boolean; onClose: 
   const [minutes, setMinutes] = useState(entry ? Math.round(entry.durationMs / MINUTE) : 45);
   const [activityId, setActivityId] = useState(entry?.activityId ?? defaultActivity);
   const [what, setWhat] = useState(entry?.taskTitle ?? "");
+  const [distractions, setDistractions] = useState(entry?.distractions ?? 0);
+  const [distractedMin, setDistractedMin] = useState(entry?.distractedMin ?? 0);
 
   const save = () => {
     const [h, m] = time.split(":").map(Number);
@@ -39,7 +41,15 @@ export function EntryDialog({ open, onClose, entry }: { open: boolean; onClose: 
       toast({ message: t("That would end in the future."), tone: "error" });
       return;
     }
-    const data = { startedAt, endedAt: startedAt + durationMs, durationMs, activityId, taskTitle: what.trim() || null };
+    const data = {
+      startedAt,
+      endedAt: startedAt + durationMs,
+      durationMs,
+      activityId,
+      taskTitle: what.trim() || null,
+      // Only store distractions once something was noted, so "not logged" stays distinct from "none".
+      ...(distractions > 0 || distractedMin > 0 || entry?.distractions != null ? { distractions, distractedMin: distractions ? distractedMin : 0 } : {}),
+    };
     if (entry) useEntries.getState().update(entry.id, data);
     else
       useEntries.getState().create({
@@ -98,6 +108,16 @@ export function EntryDialog({ open, onClose, entry }: { open: boolean; onClose: 
               ))}
             </Select>
           </label>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <div>
+            <span className="eyebrow mb-2 block text-ink-3">{t("Distractions")}</span>
+            <NumberField label={t("Distractions")} value={distractions} onChange={setDistractions} min={0} max={50} />
+          </div>
+          <div>
+            <span className="eyebrow mb-2 block text-ink-3">{t("Time lost to them")}</span>
+            <NumberField label={t("Minutes lost")} value={distractedMin} onChange={setDistractedMin} min={0} max={600} step={5} suffix="min" />
+          </div>
         </div>
         <label className="block">
           <span className="eyebrow mb-2 block text-ink-3">{t("What (optional)")}</span>

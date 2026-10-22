@@ -112,6 +112,33 @@ export function warmupComparison(sorted: Entry[], gapMs = SIT_DOWN_GAP_MS): { wa
   return { warm: summary(true), cold: summary(false) };
 }
 
+/** What the logged distractions add up to. Only sessions where they were noted count. */
+export interface DistractionStats {
+  logged: number;
+  perSession: number;
+  minutesPerSession: number;
+  totalMinutes: number;
+  /** Share of logged sessions with no distractions at all. */
+  cleanShare: number;
+  /** Last logged sessions, oldest first, for a small chart. */
+  recent: { at: number; count: number; minutes: number }[];
+}
+
+export function distractionStats(focus: Entry[]): DistractionStats {
+  const logged = focus.filter((e) => typeof e.distractions === "number").sort((a, b) => a.startedAt - b.startedAt);
+  const n = logged.length;
+  const count = logged.reduce((s, e) => s + (e.distractions ?? 0), 0);
+  const minutes = logged.reduce((s, e) => s + (e.distractedMin ?? 0), 0);
+  return {
+    logged: n,
+    perSession: n ? count / n : 0,
+    minutesPerSession: n ? minutes / n : 0,
+    totalMinutes: minutes,
+    cleanShare: n ? logged.filter((e) => !e.distractions).length / n : 0,
+    recent: logged.slice(-16).map((e) => ({ at: e.startedAt, count: e.distractions ?? 0, minutes: e.distractedMin ?? 0 })),
+  };
+}
+
 // ───────────────────────── Headline numbers ─────────────────────────
 
 export interface Kpis {
@@ -475,6 +502,32 @@ export function observations(
       id: "completion",
       title: t("You finish {pct} of the sessions you start", { pct: pct(kpis.completionRate) }),
       detail: kpis.completionRate >= 0.85 ? t("When you sit down, you tend to stay.") : t("If you often stop early, try a shorter focus length for a while."),
+    });
+  }
+
+  // Distractions, from what the person noted after sessions.
+  const ds = distractionStats(focus);
+  if (ds.logged >= 5) {
+    const half = Math.floor(ds.recent.length / 2);
+    const early = ds.recent.slice(0, half);
+    const late = ds.recent.slice(half);
+    const avg = (xs: { count: number }[]) => xs.reduce((s, x) => s + x.count, 0) / Math.max(1, xs.length);
+    const change = half >= 3 ? avg(late) - avg(early) : 0;
+    out.push({
+      id: "distractions",
+      title:
+        ds.perSession < 0.5
+          ? t("Most of your sessions are distraction-free")
+          : t("About {n} distractions per session", { n: ds.perSession.toFixed(1) }),
+      detail:
+        Math.abs(change) >= 0.4
+          ? change < 0
+            ? t("Fewer than before: {from} on average in your earlier sessions, {to} lately.", { from: avg(early).toFixed(1), to: avg(late).toFixed(1) })
+            : t("More than before: {from} on average in your earlier sessions, {to} lately.", { from: avg(early).toFixed(1), to: avg(late).toFixed(1) })
+          : t("They cost you about {min} minutes per session. {clean} of your sessions had none.", {
+              min: Math.round(ds.minutesPerSession),
+              clean: pct(ds.cleanShare),
+            }),
     });
   }
 

@@ -18,6 +18,8 @@ import { UpgradeDialog } from "../billing/UpgradeDialog";
 import { CheckoutDialog } from "../billing/CheckoutDialog";
 import { ProWelcome } from "../billing/ProWelcome";
 import { NamePrompt } from "./NamePrompt";
+import { Announcement } from "./Announcement";
+import { DistractionCheck } from "@/modules/focus/components/DistractionCheck";
 import { AuthProvider } from "../auth/AuthProvider";
 import { AuthGate } from "../auth/AuthGate";
 import { SyncProvider } from "../data/SyncProvider";
@@ -70,6 +72,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         </ClientOnly>
       )}
       {!zen && <TopBar />}
+      {!zen && (
+        <ClientOnly>
+          <Announcement />
+        </ClientOnly>
+      )}
       <main className="relative z-[1] flex-1">{children}</main>
       {!zen && <SiteFooter className={cn("pb-24 md:pb-0", isFocus && "neutral bg-page")} />}
       {!zen && <MobileNav />}
@@ -78,6 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <UpgradeDialog />
         <CheckoutDialog />
         <NamePrompt />
+        <DistractionCheck />
         <ProWelcome />
         <ConfirmDialog />
         <ShortcutsDialog />

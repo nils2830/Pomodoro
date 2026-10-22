@@ -22,6 +22,7 @@ import { hasSampleData, loadSampleData, removeSampleData } from "../sample";
 import { exportSessionsCsv } from "../export";
 import { useInsights } from "./useInsights";
 import { KpiRow } from "./KpiRow";
+import { DistractionPanel } from "./DistractionPanel";
 import { Observations } from "./Observations";
 import { SessionLog } from "./SessionLog";
 import { EntryDialog } from "./EntryDialog";
@@ -159,6 +160,12 @@ export function InsightsView() {
       <div className="mt-8">
         <KpiRow data={data} />
       </div>
+
+      {data.focus.length > 0 && (
+        <div className="mt-6">
+          <DistractionPanel stats={data.distraction} />
+        </div>
+      )}
 
       <div className="mt-14 grid gap-x-12 gap-y-16 lg:grid-cols-12">
         <Block

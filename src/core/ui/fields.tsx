@@ -45,7 +45,7 @@ export function NumberField({
           value={Number.isFinite(value) ? value : ""}
           min={min}
           max={max}
-          step={step}
+          step="any"
           onChange={(e) => {
             const n = Number(e.target.value);
             if (!Number.isNaN(n)) onChange(clamp(n));

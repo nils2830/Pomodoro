@@ -34,6 +34,7 @@ export const DEFAULT_FOCUS_SETTINGS: FocusSettings = {
   warmupEyesClosed: true,
   warmupFirstStep: true,
   warmupTone: true,
+  askDistractions: true,
 };
 
 export const useFocusSettings = createDocument<FocusSettings>("focus.settings", DEFAULT_FOCUS_SETTINGS);

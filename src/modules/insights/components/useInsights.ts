@@ -5,7 +5,7 @@ import { useEntries } from "@/core/data/entries";
 import { usePrefs } from "@/core/prefs";
 import { t, useLocale } from "@/core/i18n";
 import { useActivityList } from "@/modules/focus/hooks";
-import {
+import { distractionStats,
   activityBreakdown,
   bucketize,
   computeKpis,
@@ -66,6 +66,7 @@ export function useInsights(rangeKey: RangeKey, activityId: string | null, now: 
       lengths: lengthHistogram(sitDowns),
       weekdays: weekdayProfile(focus, range, weekStart),
       trend: weeklyTrend(allFocus, now, 16, weekStart),
+      distraction: distractionStats(focus),
       observations: observations(focus, range, now, { weekStart, weekdayNames: longNames, activityName, allFocus }),
       weekdayNames: names,
       activityName,
