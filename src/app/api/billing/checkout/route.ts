@@ -50,26 +50,25 @@ export async function POST(req: Request) {
   }
 
   const base = siteUrl(req);
-  // With Stripe Tax on, Checkout asks for a billing address and adds the right VAT.
-  const tax =
-    process.env.STRIPE_AUTOMATIC_TAX === "true"
-      ? {
-          automatic_tax: { enabled: true },
-          billing_address_collection: "required" as const,
-          customer_update: { address: "auto" as const, name: "auto" as const },
-        }
-      : {};
+  // Embedded form (ui_mode "form"): the page mounts Stripe's form with the client
+  // secret, and Stripe returns the customer to return_url once they've paid.
+  // The other options were set in Stripe's Checkout Studio.
   const session = await stripe.checkout.sessions.create({
-    ...tax,
+    ui_mode: "form",
     mode: "subscription",
     customer,
     client_reference_id: user.id,
     line_items: [{ price, quantity: 1 }],
-    allow_promotion_codes: true,
     subscription_data: { metadata: { user_id: user.id } },
-    success_url: `${base}/account?checkout=success`,
-    cancel_url: `${base}/pricing?checkout=cancelled`,
+    billing_address_collection: "auto",
+    phone_number_collection: { enabled: false },
+    automatic_tax: { enabled: false },
+    payment_method_collection: "always",
+    submit_type: "auto",
+    name_collection: { individual: { enabled: true, optional: true } },
+    integration_identifier: "custom_embedded_web_0001",
+    return_url: `${base}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
   });
 
-  return NextResponse.json({ url: session.url });
+  return NextResponse.json({ clientSecret: session.client_secret });
 }

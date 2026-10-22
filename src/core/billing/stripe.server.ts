@@ -6,7 +6,8 @@ let stripe: Stripe | null = null;
 export function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
-  stripe ??= new Stripe(key);
+  // Embedded checkout forms (ui_mode "form") need API version 2026-03-25.dahlia or later.
+  stripe ??= new Stripe(key, { apiVersion: "2026-09-30.endive" });
   return stripe;
 }
 

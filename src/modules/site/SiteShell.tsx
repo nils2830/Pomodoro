@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AuthProvider } from "@/core/auth/AuthProvider";
 import { Toaster } from "@/core/ui/Toaster";
 import { ConfirmDialog } from "@/core/ui/ConfirmDialog";
+import { CheckoutDialog } from "@/core/billing/CheckoutDialog";
 import { ClientOnly } from "@/core/shell/ClientOnly";
 import { SiteNav } from "./SiteNav";
 import { SiteFooterNight } from "./SiteFooterNight";
@@ -25,6 +26,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <SiteFooterNight />
       <ClientOnly>
         <ConfirmDialog />
+        <CheckoutDialog />
         <Toaster />
       </ClientOnly>
     </div>

@@ -75,7 +75,7 @@ export function UpgradeDialog() {
               setBusy(true);
               await startUpgrade(interval, router);
               setBusy(false);
-              if (!config.billingEnabled) close();
+              close(); // the embedded checkout opens in its own dialog
             }}
           >
             {config.billingEnabled ? "Upgrade to Pro" : "Unlock Pro (demo)"}

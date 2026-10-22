@@ -14,6 +14,7 @@ import { Toaster } from "../ui/Toaster";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { useUI } from "../ui/store";
 import { UpgradeDialog } from "../billing/UpgradeDialog";
+import { CheckoutDialog } from "../billing/CheckoutDialog";
 import { AuthProvider } from "../auth/AuthProvider";
 import { AuthGate } from "../auth/AuthGate";
 import { SyncProvider } from "../data/SyncProvider";
@@ -71,6 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ClientOnly>
         <SettingsDialog />
         <UpgradeDialog />
+        <CheckoutDialog />
         <ConfirmDialog />
         <ShortcutsDialog />
         <WarmupOverlay />

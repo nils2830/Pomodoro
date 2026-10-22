@@ -140,7 +140,7 @@ Buy one (e.g. a `.dk` from a Danish registrar, or through Vercel), add it under 
 - In Denmark you must register for VAT once your expected sales pass **50,000 kr. in any rolling 12 months** ([BDO](https://www.bdo.dk/da-dk/faglig-info/depechen/depechen-artikler-2023/ivarksatter-hvornar-skal-du-momsregistreres), [Dinero](https://dinero.dk/tips/hvornaar-skal-jeg-momsregistreres/); confirm on [skat.dk](https://skat.dk)).
 - Selling digital services to consumers in other EU countries: above €10,000 a year in such sales, you charge each customer's local VAT, usually reported through the EU [One-Stop-Shop](https://vat-one-stop-shop.ec.europa.eu/).
 - Two ways to handle it:
-  - **Stripe Tax**: turn it on in Stripe, set your prices to include tax, and set `STRIPE_AUTOMATIC_TAX=true`. Checkout then asks for the customer's country and adds the right VAT. You still file the returns.
+  - **Stripe Tax**: turn it on in Stripe, set your prices to include tax, and change `automatic_tax` to `{ enabled: true }` in `src/app/api/billing/checkout/route.ts` (it is off, as configured in Checkout Studio). Checkout then asks for the customer's country and adds the right VAT. You still file the returns.
   - **A merchant of record** (Paddle, Lemon Squeezy) sells on your behalf and handles VAT for you, for a higher fee. That would mean swapping the Stripe code for theirs.
 
 **Before you announce it**

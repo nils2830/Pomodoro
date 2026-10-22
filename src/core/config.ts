@@ -14,6 +14,8 @@ export const config = {
     enabled: Boolean(supabaseUrl && supabaseAnonKey),
   },
   billingEnabled: process.env.NEXT_PUBLIC_BILLING_ENABLED === "true",
+  /** Publishable key for the embedded Stripe checkout form. */
+  stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
   demoProAllowed: process.env.NEXT_PUBLIC_ALLOW_DEMO_PRO === "true",
   /** Shown on the terms and privacy pages. */
   legal: {

@@ -4,12 +4,13 @@ import { config } from "../config";
 import { useAuth } from "../auth/store";
 import { usePrefs } from "../prefs";
 import { toast } from "../ui/store";
+import { useCheckout } from "./CheckoutDialog";
 
 export type Interval = "month" | "year";
 
 /**
- * Starts the upgrade flow. With billing configured this goes to Stripe
- * Checkout; in local/demo mode it flips the local Pro switch instead.
+ * Starts the upgrade flow. With billing configured this opens Stripe's
+ * embedded checkout form; in local/demo mode it flips the local Pro switch instead.
  */
 export async function startUpgrade(interval: Interval, router: { push: (href: string) => void }): Promise<void> {
   if (!config.billingEnabled) {
@@ -30,8 +31,8 @@ export async function startUpgrade(interval: Interval, router: { push: (href: st
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ interval }),
   });
-  const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-  if (body.url) window.location.assign(body.url);
+  const body = (await res.json().catch(() => ({}))) as { clientSecret?: string; error?: string };
+  if (body.clientSecret) useCheckout.getState().open(body.clientSecret);
   else toast({ message: body.error ?? "Couldn't start checkout.", tone: "error" });
 }
 
