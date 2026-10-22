@@ -9,7 +9,11 @@ export function Tide(p: FaceProps) {
   return (
     <div className="relative grid aspect-square h-full max-h-full place-items-center">
       <div className="relative size-[92%] overflow-hidden rounded-full bg-ink/8 ring-2 ring-ink/25">
-        <div className="absolute inset-x-0 bottom-0 transition-[height] duration-1000 ease-linear" style={{ height: `${level * 100}%` }}>
+        {/* Moved with a transform, not height: heights snap to whole pixels, so a slow drain would step. */}
+        <div
+          className="absolute inset-0 transition-transform duration-1000 ease-linear will-change-transform"
+          style={{ transform: `translate3d(0, ${(1 - level) * 100}%, 0)` }}
+        >
           <div className="absolute inset-x-0 top-0 h-6 -translate-y-[calc(100%-6px)] overflow-hidden">
             <svg
               viewBox="0 0 200 60"
