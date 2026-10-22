@@ -56,7 +56,7 @@ export function TaskPanel({ addRequest }: { addRequest: number }) {
   };
 
   return (
-    <section aria-label={t("Tasks")} className="flex flex-col">
+    <section data-tour="tasks" aria-label={t("Tasks")} className="flex flex-col">
       <div className="flex items-center justify-between pb-3">
         <div className="flex items-baseline gap-3">
           <h2 className="display text-[26px] leading-none">{t("Tasks")}</h2>

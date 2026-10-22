@@ -192,63 +192,6 @@ body {
   }
 }
 
-/* Dropdowns: browsers that support customisable selects get a rounded menu that matches
-   the rest of Steen; others keep their native menu. */
-@supports (appearance: base-select) {
-  select,
-  ::picker(select) {
-    appearance: base-select;
-  }
-  select::picker-icon {
-    display: none;
-  }
-  ::picker(select) {
-    margin-top: 6px;
-    padding: 6px;
-    border: none;
-    border-radius: 18px;
-    background: var(--c-raised, #fff);
-    background: color-mix(in oklab, var(--c-page) 92%, var(--c-ink) 8%);
-    color: var(--c-ink);
-    box-shadow:
-      0 0 0 1px var(--c-line),
-      0 24px 60px -24px rgb(0 0 0 / 0.45);
-    opacity: 0;
-    translate: 0 -4px;
-    transition:
-      opacity 0.18s ease,
-      translate 0.18s ease,
-      overlay 0.18s allow-discrete,
-      display 0.18s allow-discrete;
-  }
-  ::picker(select):popover-open {
-    opacity: 1;
-    translate: 0 0;
-  }
-  @starting-style {
-    ::picker(select):popover-open {
-      opacity: 0;
-      translate: 0 -4px;
-    }
-  }
-  select option {
-    padding: 9px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  select option:hover,
-  select option:focus-visible {
-    background: var(--c-fill);
-    outline: none;
-  }
-  select option:checked {
-    font-weight: 600;
-  }
-  select option::checkmark {
-    display: none;
-  }
-}
 
 /* Fields that draw their own focus ring around a wrapper. */
 .own-focus:focus-visible {

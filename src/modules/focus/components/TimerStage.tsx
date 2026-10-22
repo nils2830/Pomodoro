@@ -110,13 +110,13 @@ export function TimerStage() {
   );
 
   return (
-    <section aria-label={t("Timer")} className={cn("relative flex w-full flex-col items-center", zen ? "gap-8" : "gap-6")}>
+    <section data-tour="timer" aria-label={t("Timer")} className={cn("relative flex w-full flex-col items-center", zen ? "gap-8" : "gap-6")}>
       <div
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/2 -z-10 size-[min(100vw,820px)] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-2xl"
         style={{ background: "radial-gradient(circle, var(--c-glow) 0%, transparent 62%)" }}
       />
-      <div className={cn("flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-between", zen && "sm:justify-center")}>
+      <div data-tour="modes" className={cn("flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-between", zen && "sm:justify-center")}>
         {!zen && <ModeTabs className="max-w-full overflow-x-auto" />}
         {toolbar}
       </div>
@@ -126,7 +126,9 @@ export function TimerStage() {
       {!zen && <SessionLine />}
 
       <div className="flex flex-col items-center gap-3">
-        <Controls />
+        <div data-tour="controls">
+          <Controls />
+        </div>
         <div className="h-8">
           {warmup != null && !zen && (
             <button

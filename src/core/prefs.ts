@@ -21,6 +21,10 @@ export interface Prefs {
   language: "auto" | "en" | "da";
   /** The "welcome to Pro" moment has been shown for this account. */
   proWelcomed: boolean;
+  /** The intro tour was taken or declined. */
+  tourDone: boolean;
+  /** The background suggestion above Tasks was used or closed. */
+  bgNudgeDone: boolean;
 }
 
 export const usePrefs = createDocument<Prefs>("prefs", {
@@ -31,6 +35,8 @@ export const usePrefs = createDocument<Prefs>("prefs", {
   demoPro: false,
   name: "",
   nameAsked: false,
-  language: "auto",
+  language: "en",
   proWelcomed: false,
+  tourDone: false,
+  bgNudgeDone: false,
 });

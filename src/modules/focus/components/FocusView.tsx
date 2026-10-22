@@ -12,6 +12,7 @@ import { useFocusSettings } from "../store/settings";
 import { TimerStage } from "./TimerStage";
 import { requestStartToggle, useWarmup } from "../warmup/store";
 import { TaskPanel } from "./TaskPanel";
+import { BackgroundNudge } from "./BackgroundNudge";
 import { ProgressLine } from "./ProgressLine";
 
 export function FocusView() {
@@ -106,6 +107,7 @@ export function FocusView() {
       >
         <TimerStage />
         <div className="lg:max-h-[calc(100svh-140px)] lg:overflow-y-auto lg:rounded-[30px] lg:bg-surface lg:p-6 lg:pr-5">
+          <BackgroundNudge />
           <TaskPanel addRequest={addRequest} />
         </div>
       </div>

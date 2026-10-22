@@ -4,6 +4,9 @@ import { Check, LockSimple, Prohibit } from "@phosphor-icons/react";
 import { Field } from "@/core/ui/fields";
 import { Switch } from "@/core/ui/Switch";
 import { Segmented } from "@/core/ui/Segmented";
+import { Button } from "@/core/ui/Button";
+import { useUI } from "@/core/ui/store";
+import { useTour } from "@/core/shell/Tour";
 import { ProBadge } from "@/core/ui/ProBadge";
 import { useCan } from "@/core/billing/entitlements";
 import { useGate } from "@/core/billing/useGate";
@@ -172,6 +175,18 @@ export function AppearanceSection() {
       </Group>
 
       <Group title={t("Behaviour")}>
+        <Field label={t("Intro tour")} hint={t("A short walk through the timer page.")}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              useUI.getState().closeSettings();
+              window.setTimeout(() => useTour.getState().start(), 350);
+            }}
+          >
+            {t("Show again")}
+          </Button>
+        </Field>
         <Field label={t("Dim while running")} hint={t("Deepens the background so the screen recedes.")}>
           <Switch label={t("Dim while running")} checked={s.dimWhenRunning} onChange={(v) => set({ dimWhenRunning: v })} />
         </Field>

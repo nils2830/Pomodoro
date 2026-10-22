@@ -19,6 +19,7 @@ import { CheckoutDialog } from "../billing/CheckoutDialog";
 import { ProWelcome } from "../billing/ProWelcome";
 import { NamePrompt } from "./NamePrompt";
 import { Announcement } from "./Announcement";
+import { Tour } from "./Tour";
 import { DistractionCheck } from "@/modules/focus/components/DistractionCheck";
 import { AuthProvider } from "../auth/AuthProvider";
 import { AuthGate } from "../auth/AuthGate";
@@ -86,6 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <CheckoutDialog />
         <NamePrompt />
         <DistractionCheck />
+        <Tour />
         <ProWelcome />
         <ConfirmDialog />
         <ShortcutsDialog />

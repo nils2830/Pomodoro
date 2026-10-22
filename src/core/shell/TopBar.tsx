@@ -29,7 +29,7 @@ export function TopBar() {
         <Logo />
       </Link>
 
-      <nav aria-label={t("Modules")} className="hidden items-center gap-1 md:flex">
+      <nav data-tour="nav" aria-label={t("Modules")} className="hidden items-center gap-1 md:flex">
         {MODULES.map((m) => {
           const active = isActive(pathname, m.href);
           const Icon = m.icon;
@@ -57,12 +57,16 @@ export function TopBar() {
 
       <div className="ml-auto flex items-center gap-1.5">
         <ClientOnly>
-          <DailyGoal />
+          <span data-tour="goal" className="inline-flex">
+            <DailyGoal />
+          </span>
           <PlanButton />
         </ClientOnly>
-        <IconButton label={t("Settings")} onClick={() => openSettings()} size="md">
-          <GearSix size={20} weight="bold" />
-        </IconButton>
+        <span data-tour="settings" className="inline-flex">
+          <IconButton label={t("Settings")} onClick={() => openSettings()} size="md">
+            <GearSix size={20} weight="bold" />
+          </IconButton>
+        </span>
         <ClientOnly fallback={<span className="size-10" />}>
           <AccountButton />
         </ClientOnly>
