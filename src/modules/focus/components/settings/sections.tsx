@@ -53,16 +53,11 @@ export function TimerSection() {
         <Field label="Start focus automatically" hint="After a break ends.">
           <Switch label="Start focus automatically" checked={s.autoStartFocus} onChange={(v) => set({ autoStartFocus: v })} />
         </Field>
-        <Field label="Daily goal" hint="Shown as a ring in the top bar. 0 hides it.">
-          <NumberField
-            label="Daily goal minutes"
-            value={s.dailyGoalMinutes}
-            onChange={(v) => set({ dailyGoalMinutes: v })}
-            min={0}
-            max={960}
-            step={15}
-            suffix="min"
-          />
+        <Field
+          label="Daily goal"
+          hint="Shown as a ring in the top bar; 0 hides it. Habits form fastest around a small target you can hit on most days, so start with one session and raise it once it feels easy (Lally et al. 2010)."
+        >
+          <NumberField label="Daily goal minutes" value={s.goalMinutes} onChange={(v) => set({ goalMinutes: v })} min={0} max={480} step={5} suffix="min" />
         </Field>
       </Group>
     </>

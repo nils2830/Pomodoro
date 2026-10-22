@@ -69,7 +69,8 @@ export interface FocusSettings {
   timeInTitle: boolean;
   notifications: boolean;
   reminderMinutes: number; // 0 = off
-  dailyGoalMinutes: number;
+  /** Daily focus target in minutes; 0 hides the ring. */
+  goalMinutes: number;
   /** When the focus warm-up runs: before a new sit-down, before every focus session, or never. */
   warmupWhen: "sitdown" | "always" | "off";
   /** Whole warm-up length, 30-180 s. */

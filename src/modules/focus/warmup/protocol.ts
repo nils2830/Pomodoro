@@ -161,3 +161,31 @@ export const WARMUP_REFERENCES = [
     supports: "Screen work lowers blink rate and dries the eyes, so blinking is encouraged and the gaze ends with the eyes closed.",
   },
 ] as const;
+
+/** The short "why this works" shown on the first-step screen. Plain claims, each with its source. */
+export const WARMUP_EVIDENCE = [
+  {
+    title: "Naming your first step",
+    body: "Deciding exactly what you'll do first (\u201cwhen the timer starts, I'll\u2026\u201d) is one of the best-supported ways to get started. A review of 94 studies found a medium-to-large effect on following through.",
+    source: "Gollwitzer & Sheeran, 2006",
+    url: "https://doi.org/10.1016/S0065-2601(06)38002-1",
+  },
+  {
+    title: "Resting your eyes on one point",
+    body: "Borrowed from trataka, a steady-gaze practice. In small studies, people did better on attention and memory tests after a session. It hasn't been tested as a short warm-up before work, so treat it as a calm way in, not a guarantee.",
+    source: "Raghavendra & Singh, 2016; Swathi et al., 2021",
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8718544/",
+  },
+  {
+    title: "The same ritual every time",
+    body: "A fixed routine before a task can take the edge off nerves and help performance. Doing the warm-up the same way each sit-down is part of the point.",
+    source: "Brooks et al., 2016",
+    url: "https://doi.org/10.1016/j.obhdp.2016.07.004",
+  },
+  {
+    title: "Kind to your eyes",
+    body: "Screens make us blink less, so you can blink whenever you like, and the warm-up ends with a short rest with your eyes closed.",
+    source: "Rosenfield, 2011",
+    url: "https://doi.org/10.1111/j.1475-1313.2011.00834.x",
+  },
+] as const;

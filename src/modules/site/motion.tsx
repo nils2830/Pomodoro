@@ -19,20 +19,33 @@ export function SmoothScroll() {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    // In-page anchors glide too.
+    const glide = (el: HTMLElement) => lenis.scrollTo(el, { offset: -88, duration: 1.4, easing: (t) => 1 - Math.pow(1 - t, 4) });
+    // Links to a section of this page ("#faces" or "/welcome#faces") glide there.
+    // Capture phase, so it runs before the router jumps to the anchor.
     const onClick = (e: MouseEvent) => {
-      const a = (e.target as HTMLElement).closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as HTMLElement).closest?.('a[href*="#"]') as HTMLAnchorElement | null;
       if (!a) return;
-      const el = document.querySelector(a.getAttribute("href")!);
-      if (el) {
-        e.preventDefault();
-        lenis.scrollTo(el as HTMLElement, { offset: -72, duration: 1.4 });
-      }
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || !url.hash) return;
+      const el = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+      if (!el) return;
+      e.preventDefault();
+      e.stopPropagation();
+      history.replaceState(null, "", url.hash);
+      glide(el);
     };
-    document.addEventListener("click", onClick);
+    document.addEventListener("click", onClick, true);
+    // Arriving from another page with a #section: start at the top and glide down.
+    let arrival = 0;
+    if (window.location.hash) {
+      const el = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+      if (el) arrival = window.setTimeout(() => glide(el), 350);
+    }
     return () => {
       cancelAnimationFrame(raf);
-      document.removeEventListener("click", onClick);
+      window.clearTimeout(arrival);
+      document.removeEventListener("click", onClick, true);
       lenis.destroy();
     };
   }, [reduce]);

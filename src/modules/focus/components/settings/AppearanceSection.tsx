@@ -31,6 +31,22 @@ export function AppearanceSection() {
         Colours, a place to sit and a typeface. The timer page shifts with each mode either way.
       </SectionTitle>
 
+      <Group title="Language">
+        <Field label="Language" hint="Auto follows your browser.">
+          <Segmented
+            size="sm"
+            ariaLabel="Language"
+            value={prefs.language}
+            onChange={(v) => setPrefs({ language: v })}
+            options={[
+              { value: "auto", label: "Auto" },
+              { value: "en", label: "English" },
+              { value: "da", label: "Dansk" },
+            ]}
+          />
+        </Field>
+      </Group>
+
       <Group title="Background">
         <div className="grid grid-cols-3 gap-2 py-4 sm:grid-cols-4">
           <button

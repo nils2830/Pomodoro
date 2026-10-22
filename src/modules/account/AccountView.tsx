@@ -13,6 +13,7 @@ import { signOut } from "@/core/auth/AuthProvider";
 import { wipeLocalData } from "@/core/auth/ownership";
 import { usePlan, useProSource } from "@/core/billing/entitlements";
 import { openBillingPortal } from "@/core/billing/checkout";
+import { useProWelcome } from "@/core/billing/ProWelcome";
 import { usePrefs } from "@/core/prefs";
 import { useSyncStatus } from "@/core/data/SyncProvider";
 import { useEntries } from "@/core/data/entries";
@@ -46,6 +47,7 @@ export function AccountView() {
           ? "Unlocked in demo mode"
           : "Free: the timer, tasks and 7 days of insights.";
   const demoPro = usePrefs((s) => s.doc.demoPro);
+  const displayName = usePrefs((s) => s.doc.name);
   const setPrefs = usePrefs((s) => s.set);
   const sync = useSyncStatus();
   const openSettings = useUI((s) => s.openSettings);
@@ -55,14 +57,16 @@ export function AccountView() {
   const total = focus.reduce((s, e) => s + e.durationMs, 0);
 
   useEffect(() => {
-    if (params.get("checkout") === "success") toast({ message: "Welcome to Pro. It can take a few seconds to activate.", tone: "success" });
+    if (params.get("checkout") !== "success") return;
+    useProWelcome.getState().activate();
+    window.history.replaceState(null, "", "/account");
   }, [params]);
 
   return (
     <div className="mx-auto w-full max-w-[880px] px-5 pt-10 pb-28 sm:pt-16">
       <div className="eyebrow text-ink-3">Account</div>
       <h1 className="display mt-4 text-[clamp(2.6rem,6vw,4.4rem)] leading-[0.88]">
-        {status === "signedIn" ? (user?.email ?? "Your account") : "You, on this device."}
+        {status === "signedIn" ? displayName || (user?.email ?? "Your account") : "You, on this device."}
       </h1>
       <p className="mt-4 text-[15px] text-ink-2">
         {focus.length} sessions · {formatDuration(total)} focused since you started.
@@ -91,6 +95,18 @@ export function AccountView() {
 
         {status === "signedIn" && (
           <>
+            <Row label="Name" hint="What Steen calls you.">
+              <input
+                defaultValue={displayName}
+                key={displayName}
+                maxLength={40}
+                placeholder="Your name"
+                aria-label="Your name"
+                onBlur={(e) => setPrefs({ name: e.target.value.trim(), nameAsked: true })}
+                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                className="h-9 w-48 rounded-full bg-fill px-4 text-[14px] ring-1 ring-line outline-none focus:ring-ink/40"
+              />
+            </Row>
             <Row label="Signed in with" hint={providerLabel(user?.app_metadata?.provider)}>
               <span className="text-[14px] text-ink-2">{user?.email}</span>
             </Row>

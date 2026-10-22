@@ -27,7 +27,8 @@ export const DEFAULT_FOCUS_SETTINGS: FocusSettings = {
   timeInTitle: true,
   notifications: true,
   reminderMinutes: 0,
-  dailyGoalMinutes: 120,
+  // One session a day: small enough to hit on most days, which is what builds the habit.
+  goalMinutes: 25,
   warmupWhen: "sitdown",
   warmupSeconds: WARMUP_DEFAULT_SECONDS,
   warmupEyesClosed: true,

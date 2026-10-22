@@ -4,6 +4,7 @@ import { ArrowsInSimple, CornersOut, Eye, EyeSlash, PictureInPicture } from "@ph
 import { IconButton } from "@/core/ui/Button";
 import { useUI, confirmAction } from "@/core/ui/store";
 import { useGate } from "@/core/billing/useGate";
+import { usePrefs } from "@/core/prefs";
 import { cn } from "@/core/lib/cn";
 import { MINUTE } from "@/core/lib/time";
 import { useTimer } from "../store/timer";
@@ -47,7 +48,9 @@ function SessionLine() {
   const resetRound = useTimer((s) => s.resetRound);
   const tasks = useTaskList();
   const task = tasks.find((t) => t.id === activeTaskId);
-  const prompt = mode === "focus" ? (task ? task.title : flow ? "Follow the flow." : MODE_PROMPT.focus) : MODE_PROMPT[mode];
+  const name = usePrefs((s) => s.doc.name);
+  const focusPrompt = name ? `${MODE_PROMPT.focus.replace(/\.$/, "")}, ${name}.` : MODE_PROMPT.focus;
+  const prompt = mode === "focus" ? (task ? task.title : flow ? "Follow the flow." : focusPrompt) : MODE_PROMPT[mode];
 
   return (
     <div className="flex flex-col items-center gap-3 text-center">

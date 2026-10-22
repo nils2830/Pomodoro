@@ -110,3 +110,10 @@ export async function signOut(): Promise<void> {
   wipeLocalData();
   window.location.assign("/welcome");
 }
+
+/** Re-reads the plan and any Pro gift, e.g. while waiting for Stripe to confirm a payment. */
+export async function refreshAccount(): Promise<void> {
+  const user = useAuth.getState().user;
+  if (!user) return;
+  useAuth.getState().set(await loadAccount(user.id));
+}

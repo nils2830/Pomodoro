@@ -13,6 +13,14 @@ export interface Prefs {
   font: string;
   /** Local-only Pro switch for development when billing is not configured. */
   demoPro: boolean;
+  /** What Steen calls you. Empty until asked. */
+  name: string;
+  /** The name question was answered or skipped. */
+  nameAsked: boolean;
+  /** Interface language; "auto" follows the browser. */
+  language: "auto" | "en" | "da";
+  /** The "welcome to Pro" moment has been shown for this account. */
+  proWelcomed: boolean;
 }
 
 export const usePrefs = createDocument<Prefs>("prefs", {
@@ -21,4 +29,8 @@ export const usePrefs = createDocument<Prefs>("prefs", {
   weekStart: 1,
   font: "geologica",
   demoPro: false,
+  name: "",
+  nameAsked: false,
+  language: "auto",
+  proWelcomed: false,
 });

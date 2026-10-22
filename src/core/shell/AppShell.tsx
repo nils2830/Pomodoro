@@ -7,6 +7,7 @@ import { MobileNav } from "./MobileNav";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { useAppearance } from "./useAppearance";
 import { useModeColors } from "./useModeColors";
+import { useDocumentLang } from "../i18n";
 import { ClientOnly } from "./ClientOnly";
 import { SiteFooter } from "./SiteFooter";
 import { FocusBackdrop } from "./FocusBackdrop";
@@ -15,6 +16,8 @@ import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { useUI } from "../ui/store";
 import { UpgradeDialog } from "../billing/UpgradeDialog";
 import { CheckoutDialog } from "../billing/CheckoutDialog";
+import { ProWelcome } from "../billing/ProWelcome";
+import { NamePrompt } from "./NamePrompt";
 import { AuthProvider } from "../auth/AuthProvider";
 import { AuthGate } from "../auth/AuthGate";
 import { SyncProvider } from "../data/SyncProvider";
@@ -28,6 +31,7 @@ function Engines({ isFocus }: { isFocus: boolean }) {
   useTimerEngine();
   useAppearance();
   useModeColors(isFocus);
+  useDocumentLang();
   return null;
 }
 
@@ -73,6 +77,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SettingsDialog />
         <UpgradeDialog />
         <CheckoutDialog />
+        <NamePrompt />
+        <ProWelcome />
         <ConfirmDialog />
         <ShortcutsDialog />
         <WarmupOverlay />

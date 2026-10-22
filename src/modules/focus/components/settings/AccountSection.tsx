@@ -5,6 +5,7 @@ import { ArrowRight, CreditCard, ShieldCheck, SignOut, Sparkle } from "@phosphor
 import { Field } from "@/core/ui/fields";
 import { Button } from "@/core/ui/Button";
 import { useUI } from "@/core/ui/store";
+import { usePrefs } from "@/core/prefs";
 import { useAuth } from "@/core/auth/store";
 import { signOut } from "@/core/auth/AuthProvider";
 import { usePlan, useProSource } from "@/core/billing/entitlements";
@@ -18,6 +19,8 @@ export function AccountSection() {
   const source = useProSource();
   const sync = useSyncStatus();
   const close = useUI((s) => s.closeSettings);
+  const name = usePrefs((s) => s.doc.name);
+  const setPrefs = usePrefs((s) => s.set);
 
   if (status === "disabled") {
     return (
@@ -33,6 +36,18 @@ export function AccountSection() {
     <>
       <SectionTitle eyebrow="Account" title={user?.email ?? "Your account"} />
       <Group>
+        <Field label="Name" hint="What Steen calls you.">
+          <input
+            defaultValue={name}
+            key={name}
+            maxLength={40}
+            placeholder="Your name"
+            aria-label="Your name"
+            onBlur={(e) => setPrefs({ name: e.target.value.trim(), nameAsked: true })}
+            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+            className="h-9 w-44 rounded-full bg-fill px-4 text-[14px] ring-1 ring-line outline-none focus:ring-ink/40"
+          />
+        </Field>
         <Field
           label="Plan"
           hint={source === "gift" ? "Pro, as a gift." : source === "subscription" ? "Pro subscription." : source === "demo" ? "Pro in demo mode." : "Free."}

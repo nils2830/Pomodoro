@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight } from "@phosphor-icons/react";
+import { ArrowRight, ArrowUpRight, Flask } from "@phosphor-icons/react";
 import { LogoMark } from "@/core/ui/Logo";
 import { useFocusSettings } from "../store/settings";
 import { useTasks } from "../store/data";
 import { useTimer } from "../store/timer";
 import { playSoftTone } from "../audio/synth";
-import { FIXATE_TIP, FIXATE_TIP_AT_MS, PHASE_COPY, phaseAt, phaseLength, type WarmupPhaseId } from "./protocol";
+import { FIXATE_TIP, FIXATE_TIP_AT_MS, PHASE_COPY, WARMUP_EVIDENCE, phaseAt, phaseLength, type WarmupPhaseId } from "./protocol";
 import { useWarmup } from "./store";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -244,7 +244,7 @@ function FirstStep() {
   return (
     <motion.div
       key="intent"
-      className="absolute inset-0 grid place-items-center px-5"
+      className="absolute inset-0 grid place-items-center overflow-y-auto px-5 py-20"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
@@ -290,7 +290,51 @@ function FirstStep() {
           </button>
         </div>
         <p className="mt-10 text-[12.5px] text-white/25">{length} with a single dot · Blink whenever you like</p>
+        <WhyThisWorks />
       </form>
     </motion.div>
+  );
+}
+
+/** What the research says, one tap away, so the ritual never feels like a black box. */
+function WhyThisWorks() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] text-white/40 ring-1 ring-white/10 transition-colors hover:text-white/75"
+      >
+        <Flask size={13} weight="bold" /> {open ? "Hide the research" : "Why this works"}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.ul
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.45, ease: EASE }}
+            className="mx-auto mt-4 grid max-w-[560px] gap-2 overflow-hidden text-left sm:grid-cols-2"
+          >
+            {WARMUP_EVIDENCE.map((e) => (
+              <li key={e.title} className="rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/[0.07]">
+                <div className="text-[13.5px] font-medium text-[#f3eee6]">{e.title}</div>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-white/50">{e.body}</p>
+                <a
+                  href={e.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-flex items-center gap-1 text-[11.5px] text-white/35 underline-offset-2 hover:text-white/70 hover:underline"
+                >
+                  {e.source} <ArrowUpRight size={10} weight="bold" />
+                </a>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

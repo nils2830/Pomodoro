@@ -52,9 +52,9 @@ export function AuthPanel({ mode, next: nextParam, initialError }: { mode: "sign
     setError(null);
     setNotice(null);
     if (avail && !avail.unknown && !avail[provider]) {
-      const name = provider === "apple" ? "Sign in with Apple" : "Google sign-in";
+      const name = provider === "apple" ? "Apple sign-in" : "Google sign-in";
       const other = provider === "apple" && avail.google ? "Google or an email link" : "an email link";
-      setNotice(`${name} isn't switched on for Steen yet. Use ${other} for now.`);
+      setNotice(`${name} is on its way. Until then, continue with ${other}. It only takes a moment.`);
       return;
     }
     const sb = getSupabase();

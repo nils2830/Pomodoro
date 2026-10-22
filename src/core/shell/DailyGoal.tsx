@@ -13,7 +13,7 @@ import { elapsedOf } from "@/modules/focus/engine/logic";
 /** Today's focused time against the daily goal, as a small ring. */
 export function DailyGoal() {
   const items = useEntries((s) => s.items);
-  const goal = useFocusSettings((s) => s.doc.dailyGoalMinutes) * MINUTE;
+  const goal = useFocusSettings((s) => s.doc.goalMinutes) * MINUTE;
   const timer = useTimer();
   const now = useNow(15_000);
 
