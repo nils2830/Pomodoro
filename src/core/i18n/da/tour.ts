@@ -27,6 +27,17 @@ const da: Record<string, string> = {
   "Tap one to try it. More in settings.": "Tryk på en for at prøve den. Flere i indstillinger.",
   "All backgrounds": "Alle baggrunde",
   "Keep as is": "Behold som den er",
+  Feedback: "Feedback",
+  "Kind of feedback": "Slags feedback",
+  Idea: "Idé",
+  Problem: "Problem",
+  Other: "Andet",
+  "Your feedback": "Din feedback",
+  "What happened, and what did you expect?": "Hvad skete der, og hvad forventede du?",
+  "What would make Steen better for you?": "Hvad ville gøre Steen bedre for dig?",
+  Send: "Send",
+  "Couldn't send it. Try again.": "Det kunne ikke sendes. Prøv igen.",
+  "Thanks. It went straight to the person who builds Steen.": "Tak. Den gik direkte til den, der bygger Steen.",
 };
 
 export default da;

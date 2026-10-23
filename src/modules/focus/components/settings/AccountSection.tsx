@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CreditCard, ShieldCheck, SignOut, Sparkle } from "@phosphor-icons/react";
 import { Field } from "@/core/ui/fields";
+import { Segmented } from "@/core/ui/Segmented";
+import { toast } from "@/core/ui/store";
 import { Button } from "@/core/ui/Button";
 import { useUI } from "@/core/ui/store";
 import { usePrefs } from "@/core/prefs";
@@ -101,6 +104,7 @@ export function AccountSection() {
           </Field>
         )}
       </Group>
+      <FeedbackForm />
       <div className="mt-6 flex flex-wrap gap-2">
         <Link
           href="/account"
@@ -114,5 +118,57 @@ export function AccountSection() {
         </Button>
       </div>
     </>
+  );
+}
+
+/** Straight to the admin's inbox. */
+function FeedbackForm() {
+  const t = useT();
+  const [kind, setKind] = useState<"idea" | "problem" | "other">("idea");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const send = async () => {
+    setSending(true);
+    try {
+      const res = await fetch("/api/feedback", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind, message }) });
+      if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? t("Couldn't send it. Try again."));
+      setMessage("");
+      toast({ message: t("Thanks. It went straight to the person who builds Steen."), tone: "success" });
+    } catch (e) {
+      toast({ message: (e as Error).message, tone: "error" });
+    } finally {
+      setSending(false);
+    }
+  };
+  return (
+    <Group title={t("Feedback")}>
+      <div className="py-4">
+        <Segmented
+          size="sm"
+          ariaLabel={t("Kind of feedback")}
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: "idea", label: t("Idea") },
+            { value: "problem", label: t("Problem") },
+            { value: "other", label: t("Other") },
+          ]}
+        />
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          maxLength={2000}
+          rows={3}
+          aria-label={t("Your feedback")}
+          placeholder={kind === "problem" ? t("What happened, and what did you expect?") : t("What would make Steen better for you?")}
+          className="mt-3 w-full resize-none bg-fill px-4 py-3 text-[14.5px] ring-1 ring-line outline-none"
+        />
+        <div className="mt-2 flex justify-end">
+          <Button size="sm" onClick={send} disabled={sending || !message.trim()}>
+            {t("Send")}
+          </Button>
+        </div>
+      </div>
+    </Group>
   );
 }

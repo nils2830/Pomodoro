@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CaretDown, CheckCircle, DownloadSimple, Gift, Megaphone, MagnifyingGlass, PencilSimple, ShieldCheck, Trash, WarningCircle, XCircle } from "@phosphor-icons/react";
+import { ArrowCounterClockwise, CaretDown, ChartBar, ChatCircleText, CheckCircle, CreditCard, DownloadSimple, Gift, Megaphone, Prohibit, MagnifyingGlass, PencilSimple, ShieldCheck, Trash, WarningCircle, XCircle } from "@phosphor-icons/react";
 import { Button } from "@/core/ui/Button";
 import { Segmented } from "@/core/ui/Segmented";
 import { TextInput } from "@/core/ui/fields";
@@ -180,8 +180,11 @@ function AdminPanel() {
       </div>
 
       <Overview />
+      <Usage />
       <LaunchChecklist />
       <AnnouncementEditor />
+      <FeedbackInbox />
+      <Subscriptions />
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[400px_1fr]">
         <section className="self-start rounded-[28px] bg-surface p-6 sm:p-7">
@@ -476,6 +479,7 @@ function Overview() {
 interface Detail {
   lastSignInAt: string | null;
   confirmedAt: string | null;
+  bannedUntil: string | null;
   providers: string[];
   usage: { sessions: number; focusHours: number; lastSession: number | null };
 }
@@ -504,8 +508,29 @@ function UserDetail({ user, onDeleted }: { user: UserRow; onDeleted: () => void 
     }
   };
 
+  const suspended = Boolean(d?.bannedUntil && new Date(d.bannedUntil) > new Date());
+  const toggleSuspend = async () => {
+    if (!suspended) {
+      const ok = await confirmAction({
+        title: `Suspend ${user.email ?? "this account"}?`,
+        body: "They're signed out and can't sign in again until you lift it. Their data stays.",
+        confirmLabel: "Suspend",
+        tone: "danger",
+      });
+      if (!ok) return;
+    }
+    try {
+      await api(`/api/admin/users/${user.id}`, { method: "PATCH", body: JSON.stringify({ action: suspended ? "unsuspend" : "suspend" }) });
+      setD((x) => (x ? { ...x, bannedUntil: suspended ? null : "9999-01-01T00:00:00Z" } : x));
+      toast({ message: suspended ? "Suspension lifted." : "Account suspended.", tone: "success" });
+    } catch (e) {
+      toast({ message: (e as Error).message, tone: "error" });
+    }
+  };
+
   const rows: [string, string][] = d
     ? [
+        ["Status", suspended ? "Suspended" : d.confirmedAt ? "Active" : "Email not confirmed"],
         ["Signs in with", d.providers.join(", ") || "email"],
         ["Last sign-in", d.lastSignInAt ? new Date(d.lastSignInAt).toLocaleString() : "never"],
         ["Focus sessions", `${d.usage.sessions} · ${d.usage.focusHours} h`],
@@ -529,7 +554,12 @@ function UserDetail({ user, onDeleted }: { user: UserRow; onDeleted: () => void 
           ))}
         </dl>
       )}
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex flex-wrap justify-end gap-2">
+        {d && (
+          <Button size="sm" variant="outline" icon={suspended ? <ArrowCounterClockwise size={14} weight="bold" /> : <Prohibit size={14} weight="bold" />} onClick={toggleSuspend}>
+            {suspended ? "Lift suspension" : "Suspend"}
+          </Button>
+        )}
         <Button size="sm" variant="outline" icon={<Trash size={14} weight="bold" />} onClick={remove}>
           Delete account
         </Button>
@@ -592,6 +622,229 @@ function AnnouncementEditor() {
         )}
         <span className="ml-auto text-[12px] text-ink-3 tabular-nums">{message.length}/280</span>
       </div>
+    </section>
+  );
+}
+
+interface UsageData {
+  face: Record<string, number>;
+  theme: Record<string, number>;
+  background: Record<string, number>;
+  warmup: Record<string, number>;
+  language: Record<string, number>;
+  font: Record<string, number>;
+  members: number;
+  askDistractions: number;
+  sessions30: number;
+  avgMinutes30: number;
+  completed30: number;
+  distractionsLogged30: number;
+  retentionCohort: number;
+  retentionReturned: number;
+}
+
+const share = (n: number, of: number) => (of ? `${Math.round((n / of) * 100)}%` : "–");
+
+function Bars({ title, data }: { title: string; data: Record<string, number> }) {
+  const rows = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const total = rows.reduce((n, [, v]) => n + v, 0);
+  return (
+    <div>
+      <div className="eyebrow mb-2.5 text-ink-3">{title}</div>
+      <ul className="space-y-1.5">
+        {rows.slice(0, 6).map(([k, v]) => (
+          <li key={k} className="relative overflow-hidden rounded-lg bg-fill px-2.5 py-1.5 text-[13px]">
+            <span className="absolute inset-y-0 left-0 bg-ink/10" style={{ width: share(v, total) }} />
+            <span className="relative flex justify-between gap-2">
+              <span className="truncate">{k === "none" ? "theme colour" : k}</span>
+              <span className="text-ink-3 tabular-nums">{share(v, total)}</span>
+            </span>
+          </li>
+        ))}
+        {!rows.length && <li className="text-[13px] text-ink-3">No data yet.</li>}
+      </ul>
+    </div>
+  );
+}
+
+/** What members pick and how their sessions go. Counts members whose settings have synced. */
+function Usage() {
+  const [u, setU] = useState<UsageData | null>(null);
+  useEffect(() => {
+    api<UsageData>("/api/admin/usage").then(setU, () => {});
+  }, []);
+  if (!u) return null;
+  const facts: [string, string, string][] = [
+    ["Week-one retention", share(u.retentionReturned, u.retentionCohort), `${u.retentionReturned} of ${u.retentionCohort} came back after their first week`],
+    ["Average session", `${u.avgMinutes30} min`, `${u.sessions30} focus sessions in 30 days`],
+    ["Finished", share(u.completed30, u.sessions30), "of sessions ran to the end"],
+    ["Distractions noted", share(u.distractionsLogged30, u.sessions30), `${share(u.askDistractions, u.members)} keep the question on`],
+  ];
+  return (
+    <section className="mt-6 rounded-[28px] bg-surface p-6 sm:p-7">
+      <div className="flex items-center gap-2">
+        <ChartBar size={20} weight="bold" />
+        <h2 className="display text-[24px] leading-none">Usage</h2>
+      </div>
+      <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-6 lg:grid-cols-4">
+        {facts.map(([label, value, sub]) => (
+          <div key={label}>
+            <div className="eyebrow text-ink-3">{label}</div>
+            <div className="mt-2.5 text-[clamp(1.4rem,2.6vw,1.9rem)] leading-none font-semibold tracking-[-0.03em] tabular-nums">{value}</div>
+            <div className="mt-1.5 text-[12.5px] text-ink-3">{sub}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Bars title="Background" data={u.background} />
+        <Bars title="Timer face" data={u.face} />
+        <Bars title="Colour theme" data={u.theme} />
+        <Bars title="Warm-up" data={u.warmup} />
+        <Bars title="Language" data={u.language} />
+        <Bars title="Typeface" data={u.font} />
+      </div>
+    </section>
+  );
+}
+
+interface FeedbackItem {
+  id: string;
+  email: string | null;
+  kind: "idea" | "problem" | "other";
+  message: string;
+  resolved: boolean;
+  created_at: string;
+}
+
+/** What members send from Settings → Account → Feedback. */
+function FeedbackInbox() {
+  const [items, setItems] = useState<FeedbackItem[] | null>(null);
+  const load = useCallback(() => api<{ items: FeedbackItem[] }>("/api/admin/feedback").then((b) => setItems(b.items), () => setItems([])), []);
+  useEffect(() => {
+    load();
+  }, [load]);
+  const act = async (method: "PATCH" | "DELETE", body: object) => {
+    try {
+      await api("/api/admin/feedback", { method, body: JSON.stringify(body) });
+      await load();
+    } catch (e) {
+      toast({ message: (e as Error).message, tone: "error" });
+    }
+  };
+  const open = items?.filter((f) => !f.resolved).length ?? 0;
+  return (
+    <section className="mt-6 rounded-[28px] bg-surface p-6 sm:p-7">
+      <div className="flex items-center gap-2">
+        <ChatCircleText size={20} weight="bold" />
+        <h2 className="display text-[24px] leading-none">Feedback</h2>
+        {open > 0 && <span className="ml-1 rounded-full bg-ink px-2 py-0.5 text-[12px] font-semibold text-page">{open}</span>}
+      </div>
+      <ul className="mt-4 border-t border-line">
+        {items?.map((f) => (
+          <li key={f.id} className={cn("border-b border-line py-3.5", f.resolved && "opacity-50")}>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-ink-3">
+              <span className={cn("rounded-full px-2 py-0.5 font-medium", f.kind === "problem" ? "bg-bad/15 text-bad" : "bg-fill text-ink-2")}>{f.kind}</span>
+              <span>{f.email ?? "unknown"}</span>
+              <span>{new Date(f.created_at).toLocaleString()}</span>
+            </div>
+            <p className="mt-1.5 text-[14.5px] leading-snug whitespace-pre-wrap">{f.message}</p>
+            <div className="mt-2 flex gap-3 text-[12.5px]">
+              <button type="button" onClick={() => act("PATCH", { id: f.id, resolved: !f.resolved })} className="text-ink-3 hover:text-ink">
+                {f.resolved ? "Reopen" : "Mark as handled"}
+              </button>
+              {f.email && (
+                <a href={`mailto:${f.email}?subject=${encodeURIComponent("About your feedback on Steen")}`} className="text-ink-3 hover:text-ink">
+                  Reply by email
+                </a>
+              )}
+              <button type="button" onClick={() => act("DELETE", { id: f.id })} className="text-ink-3 hover:text-bad">
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+        {items && !items.length && <li className="py-4 text-[14px] text-ink-3">Nothing yet. Members can write from Settings → Account.</li>}
+      </ul>
+    </section>
+  );
+}
+
+interface Sub {
+  id: string;
+  email: string | null;
+  status: string;
+  interval: string | null;
+  amount: number | null;
+  currency: string;
+  cancelAtPeriodEnd: boolean;
+  periodEnd: number | null;
+  created: number;
+}
+
+/** Stripe subscriptions: who pays, who is leaving, and stopping or resuming renewal. */
+function Subscriptions() {
+  const [data, setData] = useState<{ live: boolean | null; items: Sub[] } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const load = useCallback(() => api<{ live: boolean | null; items: Sub[] }>("/api/admin/subscriptions").then(setData, (e: Error) => setError(e.message)), []);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const change = async (s: Sub, action: "cancel" | "resume") => {
+    if (action === "cancel") {
+      const ok = await confirmAction({
+        title: `Stop renewal for ${s.email ?? "this member"}?`,
+        body: `They keep Pro until ${s.periodEnd ? fmtDate(new Date(s.periodEnd * 1000).toISOString()) : "the period ends"}, then drop to free. No refund is made; do that in Stripe if needed.`,
+        confirmLabel: "Stop renewal",
+        tone: "danger",
+      });
+      if (!ok) return;
+    }
+    try {
+      await api("/api/admin/subscriptions", { method: "POST", body: JSON.stringify({ id: s.id, action }) });
+      toast({ message: action === "cancel" ? "Renewal stopped." : "Renewal resumed.", tone: "success" });
+      await load();
+    } catch (e) {
+      toast({ message: (e as Error).message, tone: "error" });
+    }
+  };
+
+  return (
+    <section className="mt-6 rounded-[28px] bg-surface p-6 sm:p-7">
+      <div className="flex items-center gap-2">
+        <CreditCard size={20} weight="bold" />
+        <h2 className="display text-[24px] leading-none">Subscriptions</h2>
+        {data?.live === false && <span className="ml-auto rounded-full bg-fill px-2.5 py-1 text-[12px] font-medium text-ink-3">Test mode</span>}
+      </div>
+      {error ? (
+        <p className="mt-4 text-[14px] text-ink-3">{error}</p>
+      ) : (
+        <ul className="mt-4 border-t border-line">
+          {data?.items.map((s) => {
+            const active = s.status === "active" || s.status === "trialing" || s.status === "past_due";
+            return (
+              <li key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[15px]">{s.email ?? "(no email)"}</div>
+                  <div className="text-[12.5px] text-ink-3">
+                    {s.amount != null ? `${s.amount} ${s.currency.toUpperCase()} / ${s.interval}` : ""}
+                    {s.periodEnd ? ` · ${s.cancelAtPeriodEnd ? "ends" : "renews"} ${fmtDate(new Date(s.periodEnd * 1000).toISOString())}` : ""}
+                  </div>
+                </div>
+                <span className={cn("text-[13px]", s.status === "past_due" ? "text-bad" : "text-ink-2")}>
+                  {s.cancelAtPeriodEnd && active ? "Cancelling" : s.status.replace("_", " ")}
+                </span>
+                {active && (
+                  <Button size="sm" variant="outline" onClick={() => change(s, s.cancelAtPeriodEnd ? "resume" : "cancel")}>
+                    {s.cancelAtPeriodEnd ? "Resume" : "Stop renewal"}
+                  </Button>
+                )}
+              </li>
+            );
+          })}
+          {data && !data.items.length && <li className="py-4 text-[14px] text-ink-3">No subscriptions yet.</li>}
+        </ul>
+      )}
     </section>
   );
 }
