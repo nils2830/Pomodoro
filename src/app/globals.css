@@ -157,6 +157,8 @@
 /* ───────────────────────── Base ───────────────────────── */
 
 html {
+  /* No rubber-band past the footer, where the focus page colour would show as a stripe. */
+  overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

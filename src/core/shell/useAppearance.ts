@@ -1,5 +1,7 @@
 "use client";
 
+import { BACKGROUNDS } from "../theme/backgrounds";
+
 import { useEffect } from "react";
 import { usePrefs } from "../prefs";
 import { FONTS, getFont } from "../theme/fonts";
@@ -26,6 +28,7 @@ export function useAppearance() {
 }
 
 const fontMap = Object.fromEntries(FONTS.map((f) => [f.id, f.family]));
+const bgMap = Object.fromEntries(BACKGROUNDS.map((b) => [b.id, [b.src, b.blur, b.color]]));
 
 /**
  * Inline script for <head>, runs before first paint:
@@ -37,4 +40,7 @@ var ls=localStorage;for(var i=ls.length-1;i>=0;i--){var k=ls.key(i);if(k&&k.inde
 var p=JSON.parse(ls.getItem('steen:prefs')||'{}');var doc=(p.state&&p.state.doc)||{};var a=doc.appearance||'system';
 var d=a==='dark'||(a==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';
 var f=${JSON.stringify(fontMap)}[doc.font];if(f)document.documentElement.style.setProperty('--font-user',f);
+if(location.pathname==='/'){var fs=JSON.parse(ls.getItem('steen:focus.settings')||'{}');var fd=(fs.state&&fs.state.doc)||{};var b=${JSON.stringify(bgMap)}[fd.background];
+if(b){var h=document.documentElement.style,dm=typeof fd.backgroundDim==='number'?fd.backgroundDim:0.25,l=document.createElement('link');l.rel='preload';l.as='image';l.href=b[0];l.setAttribute('fetchpriority','high');document.head.appendChild(l);
+h.setProperty('--boot-bg','linear-gradient(rgb(8 7 6 / '+dm+'),rgb(8 7 6 / '+dm+')),url('+b[0]+'),url('+b[1]+')');h.setProperty('--boot-bg-color',b[2]);}}
 }catch(e){}})();`;

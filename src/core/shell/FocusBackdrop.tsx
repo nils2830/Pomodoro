@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getBackground } from "../theme/backgrounds";
 import { useTimer } from "@/modules/focus/store/timer";
 import { useFocusSettings } from "@/modules/focus/store/settings";
@@ -16,7 +16,18 @@ export function FocusBackdrop() {
   const dim = useFocusSettings((s) => s.doc.backgroundDim);
   const dimRunning = useFocusSettings((s) => s.doc.dimWhenRunning);
   const running = useTimer((s) => s.status === "running");
-  const [loaded, setLoaded] = useState<string | null>(null);
+  // A cached image (preloaded by the boot script) shows at once instead of fading in over the blur.
+  const [loaded, setLoaded] = useState<string | null>(() => {
+    if (!bg) return null;
+    const img = new Image();
+    img.src = bg.src;
+    return img.complete ? bg.id : null;
+  });
+  // From here on this component paints the background, so the boot layer must not linger after a change.
+  useEffect(() => {
+    document.documentElement.style.removeProperty("--boot-bg");
+    document.documentElement.style.removeProperty("--boot-bg-color");
+  }, []);
   if (!bg) return null;
   const shade = Math.min(0.85, dim + (dimRunning && running ? 0.2 : 0));
   return (

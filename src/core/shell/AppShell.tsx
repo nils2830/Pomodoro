@@ -68,6 +68,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SyncProvider />
       </ClientOnly>
       {isFocus && (
+        // Painted from the first byte for returning members with a background; the boot script fills in the image.
+        <div
+          id="boot-bg"
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center"
+          style={{ backgroundImage: "var(--boot-bg, none)", backgroundColor: "var(--boot-bg-color, transparent)" }}
+        />
+      )}
+      {isFocus && (
         <ClientOnly>
           <FocusBackdrop />
         </ClientOnly>
