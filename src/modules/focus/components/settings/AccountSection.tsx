@@ -59,7 +59,11 @@ export function AccountSection() {
           hint={
             source === "gift"
               ? t("Pro, as a gift.")
-              : source === "subscription"
+              : source === "subscription" && profile?.plan_status === "trialing" && profile.current_period_end
+                ? t("Free trial until {date}. After that it renews unless you cancel.", {
+                    date: new Date(profile.current_period_end).toLocaleDateString(localeTag(locale), { day: "numeric", month: "long" }),
+                  })
+                : source === "subscription"
                 ? t("Pro subscription.")
                 : source === "demo"
                   ? t("Pro in demo mode.")

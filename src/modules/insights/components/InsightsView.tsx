@@ -23,6 +23,7 @@ import { exportSessionsCsv } from "../export";
 import { useInsights } from "./useInsights";
 import { KpiRow } from "./KpiRow";
 import { DistractionPanel } from "./DistractionPanel";
+import { ShareWeek } from "./ShareWeek";
 import { Observations } from "./Observations";
 import { SessionLog } from "./SessionLog";
 import { EntryDialog } from "./EntryDialog";
@@ -112,6 +113,7 @@ export function InsightsView() {
           <h1 className="display mt-3 text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.86]">{t("Your rhythm")}</h1>
         </div>
         <div className="flex flex-wrap gap-2">
+          <ShareWeek />
           <Button variant="outline" icon={<Plus size={15} weight="bold" />} onClick={() => setLogOpen(true)}>
             {t("Log time")}
           </Button>

@@ -59,9 +59,10 @@ function loadStripeJs(): Promise<void> {
   return loading;
 }
 
-export const useCheckout = create<{ clientSecret: string | null; open(secret: string): void; close(): void }>()((set) => ({
+export const useCheckout = create<{ clientSecret: string | null; trial: boolean; open(secret: string, trial?: boolean): void; close(): void }>()((set) => ({
   clientSecret: null,
-  open: (clientSecret) => set({ clientSecret }),
+  trial: false,
+  open: (clientSecret, trial = false) => set({ clientSecret, trial }),
   close: () => set({ clientSecret: null }),
 }));
 
@@ -70,6 +71,7 @@ export function CheckoutDialog() {
   const t = useT();
   const clientSecret = useCheckout((s) => s.clientSecret);
   const close = useCheckout((s) => s.close);
+  const trial = useCheckout((s) => s.trial);
   const host = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,7 +109,7 @@ export function CheckoutDialog() {
   }, [clientSecret]);
 
   return (
-    <Dialog open={clientSecret !== null} onClose={close} eyebrow="Steen Pro" title={t("Upgrade to Pro")} size="md">
+    <Dialog open={clientSecret !== null} onClose={close} eyebrow="Steen Pro" title={trial ? t("Start your free week") : t("Upgrade to Pro")} size="md">
       {error ? (
         <p className="py-6 text-[15px] text-bad">{error}</p>
       ) : (

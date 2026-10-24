@@ -7,7 +7,7 @@ const description =
 export const metadata: Metadata = {
   title: { absolute: "Steen: free Pomodoro and focus timer for studying" },
   description,
-  alternates: { canonical: "/welcome" },
+  alternates: { canonical: "/welcome", languages: { en: "/welcome", da: "/da", "x-default": "/welcome" } },
 };
 
 /** Structured data so search engines know this is a free web app, not just a page. */

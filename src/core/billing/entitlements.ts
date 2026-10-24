@@ -35,3 +35,13 @@ export function useCan(_feature: Feature): boolean {
 export function useLimits() {
   return LIMITS[usePlan()];
 }
+
+/**
+ * Whether the next checkout starts with a free trial: only for people who have
+ * never had a subscription. The server decides for real; this is for the copy.
+ */
+export function useTrialEligible(): boolean {
+  const status = useAuth((s) => s.status);
+  const planStatus = useAuth((s) => s.profile?.plan_status ?? null);
+  return config.billingEnabled && (status !== "signedIn" || planStatus === null);
+}

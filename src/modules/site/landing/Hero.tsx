@@ -6,10 +6,12 @@ import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
 import { AppleLogo, ArrowRight } from "@phosphor-icons/react";
 import { getBackground } from "@/core/theme/backgrounds";
 import { formatClock, MINUTE } from "@/core/lib/time";
+import { useT } from "@/core/i18n";
 import { EASE, WordReveal } from "../motion";
 
 /** A glass timer card that counts down for real while you read. */
 function HeroTimer() {
+  const t = useT();
   const [left, setLeft] = useState(25 * MINUTE - 7_000);
   useEffect(() => {
     const id = window.setInterval(() => setLeft((l) => (l <= 1000 ? 25 * MINUTE : l - 1000)), 1000);
@@ -22,8 +24,8 @@ function HeroTimer() {
     <div className="animate-bob w-[300px] rounded-[30px] bg-black/28 p-5 text-white shadow-[0_30px_80px_-30px_rgb(0_0_0/0.8)] ring-1 ring-white/15 backdrop-blur-2xl">
       <div className="flex items-center justify-between">
         <div className="flex gap-1 rounded-full bg-white/10 p-1 text-[11.5px]">
-          <span className="rounded-full bg-white px-2.5 py-1 font-medium text-black">Focus</span>
-          <span className="px-2 py-1 text-white/70">Break</span>
+          <span className="rounded-full bg-white px-2.5 py-1 font-medium text-black">{t("Focus")}</span>
+          <span className="px-2 py-1 text-white/70">{t("Break")}</span>
         </div>
         <svg width="38" height="38" viewBox="0 0 110 110" className="-rotate-90">
           <circle cx="55" cy="55" r={r} fill="none" stroke="white" strokeOpacity="0.18" strokeWidth="10" />
@@ -32,9 +34,9 @@ function HeroTimer() {
       </div>
       <div className="timer-digits mt-6 text-[78px] leading-none">{formatClock(left)}</div>
       <div className="mt-3 flex items-center justify-between text-[13px] text-white/75">
-        <span>#3 · Chapter 5 notes</span>
+        <span>#3 · {t("Chapter 5 notes")}</span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-[#3987e5]" /> Study
+          <span className="size-2 rounded-full bg-[#3987e5]" /> {t("Study")}
         </span>
       </div>
     </div>
@@ -42,6 +44,7 @@ function HeroTimer() {
 }
 
 export function Hero() {
+  const t = useT();
   const bg = getBackground("dawn")!;
   const reduce = useReducedMotion();
   const { scrollY } = useScroll();
@@ -70,10 +73,10 @@ export function Hero() {
           <span className="grid size-6 place-items-center rounded-full bg-white text-black">
             <AppleLogo size={13} weight="fill" />
           </span>
-          Coming soon to iPhone
+          {t("Coming soon to iPhone")}
         </motion.div>
         <h1 className="display max-w-[12ch] text-[clamp(3.4rem,10vw,9rem)] leading-[0.86] text-white">
-          <WordReveal text="Focus, set in stone." delay={0.45} />
+          <WordReveal text={t("Focus, set in stone.")} delay={0.45} />
         </h1>
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -81,18 +84,18 @@ export function Hero() {
           transition={{ duration: 1.1, delay: 1.05, ease: EASE }}
           className="mt-7 max-w-[46ch] text-[clamp(1.05rem,1.6vw,1.3rem)] leading-relaxed text-white/80"
         >
-          A calm focus timer. Warm up on a single point, hide the countdown if it distracts you, and see how often you really sit down to work.
+          {t("A calm focus timer. Warm up on a single point, hide the countdown if it distracts you, and see how often you really sit down to work.")}
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.1, delay: 1.25, ease: EASE }} className="mt-9 flex flex-wrap gap-3">
           <Link
             href="/login?mode=signup"
             className="group inline-flex h-14 items-center gap-2 rounded-full bg-white px-7 text-[16px] font-medium text-black shadow-[0_16px_40px_-16px_rgb(255_255_255/0.5)] transition-transform hover:-translate-y-0.5"
           >
-            Create a free account
+            {t("Create a free account")}
             <ArrowRight size={17} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
           </Link>
           <Link href="/login" className="inline-flex h-14 items-center rounded-full bg-white/10 px-7 text-[16px] text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-white/15">
-            Sign in
+            {t("Sign in")}
           </Link>
         </motion.div>
       </motion.div>
@@ -107,7 +110,7 @@ export function Hero() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2, duration: 1 }} className="absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 text-[11px] tracking-[0.2em] text-white/55 uppercase sm:flex">
-        Scroll
+        {t("Scroll")}
         <span className="relative h-10 w-px overflow-hidden bg-white/20">
           <motion.span className="absolute inset-x-0 top-0 h-4 bg-white" animate={{ y: [-16, 40] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
         </span>

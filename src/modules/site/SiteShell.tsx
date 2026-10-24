@@ -9,14 +9,17 @@ import { CheckoutDialog } from "@/core/billing/CheckoutDialog";
 import { ClientOnly } from "@/core/shell/ClientOnly";
 import { SiteNav } from "./SiteNav";
 import { SiteFooterNight } from "./SiteFooterNight";
+import { LocaleProvider } from "@/core/i18n";
 import { cn } from "@/core/lib/cn";
 
 /** Chrome for the public pages: welcome, sign-in, pricing, legal. Always night. */
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // The welcome hero and the sign-in screen run edge to edge; other pages clear the floating nav.
-  const fullBleed = pathname === "/welcome" || pathname === "/login";
+  const fullBleed = pathname === "/welcome" || pathname === "/da" || pathname === "/login";
   return (
+    // The Danish landing page renders in Danish from the server, so search engines index it in Danish.
+    <LocaleProvider locale={pathname === "/da" ? "da" : null}>
     <div className="night grain relative flex min-h-svh flex-col">
       <ClientOnly>
         <AuthProvider />
@@ -30,5 +33,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
         <Toaster />
       </ClientOnly>
     </div>
+    </LocaleProvider>
   );
 }

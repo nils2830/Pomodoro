@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getAdminSupabase, getServerSupabase } from "@/core/auth/supabase-server";
 import { getStripe, priceFor, siteUrl } from "@/core/billing/stripe.server";
 import { isGrantActive } from "@/core/billing/grants";
+import { TRIAL_DAYS } from "@/core/billing/plans";
 
 /** False when Stripe has deleted the customer or never had it. Other errors throw. */
 async function customerExists(stripe: Stripe, id: string): Promise<boolean> {
@@ -49,6 +50,10 @@ export async function POST(req: Request) {
     await admin.from("profiles").update({ stripe_customer_id: customer, updated_at: new Date().toISOString() }).eq("id", user.id);
   }
 
+  // A free week for anyone who has never had a subscription.
+  const prior = await stripe.subscriptions.list({ customer, status: "all", limit: 1 });
+  const trial = prior.data.length === 0;
+
   const base = siteUrl(req);
   // Embedded form (ui_mode "form"): the page mounts Stripe's form with the client
   // secret, and Stripe returns the customer to return_url once they've paid.
@@ -59,7 +64,10 @@ export async function POST(req: Request) {
     customer,
     client_reference_id: user.id,
     line_items: [{ price, quantity: 1 }],
-    subscription_data: { metadata: { user_id: user.id } },
+    subscription_data: {
+      metadata: { user_id: user.id },
+      ...(trial ? { trial_period_days: TRIAL_DAYS, trial_settings: { end_behavior: { missing_payment_method: "cancel" as const } } } : {}),
+    },
     billing_address_collection: "auto",
     phone_number_collection: { enabled: false },
     automatic_tax: { enabled: false },
@@ -70,5 +78,5 @@ export async function POST(req: Request) {
     return_url: `${base}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
   });
 
-  return NextResponse.json({ clientSecret: session.client_secret });
+  return NextResponse.json({ clientSecret: session.client_secret, trial });
 }

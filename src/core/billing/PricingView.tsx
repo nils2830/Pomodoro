@@ -9,10 +9,10 @@ import { Segmented } from "../ui/Segmented";
 import { Button } from "../ui/Button";
 import { toast } from "../ui/store";
 import { config } from "../config";
-import { usePlan } from "./entitlements";
+import { usePlan, useTrialEligible } from "./entitlements";
 import { useAuth } from "../auth/store";
 import { LogoMark } from "../ui/Logo";
-import { FEATURES, FREE_INCLUDES, PRICING, PRO_HIGHLIGHTS } from "./plans";
+import { FEATURES, FREE_INCLUDES, PRICING, PRO_HIGHLIGHTS, TRIAL_DAYS } from "./plans";
 import { t as translate, useT } from "../i18n";
 import { startUpgrade, type Interval } from "./checkout";
 
@@ -39,6 +39,10 @@ const COMPARE: [string, boolean | string, boolean | string][] = [
 ];
 
 const FAQ: { q: string; a: string }[] = [
+  {
+    q: "How does the free week work?",
+    a: "If you've never had Pro, your first 7 days are free. You add a card at checkout, but nothing is charged until the week is over, and if you cancel before then you pay nothing.",
+  },
   {
     q: "Why do I need an account for the free plan?",
     a: "Your sessions are the whole point of the insights, so they are saved to your account from the first minute. Switch browsers or lose a laptop and nothing is gone.",
@@ -72,6 +76,7 @@ export function PricingView() {
   const [interval, setInterval] = useState<Interval>(params.get("interval") === "month" ? "month" : "year");
   const [busy, setBusy] = useState(false);
   const signedOut = useAuth((s) => s.status === "signedOut");
+  const trial = useTrialEligible();
   const monthly = interval === "year" ? (PRICING.yearly / 12).toFixed(2).replace(/\.00$/, "") : String(PRICING.monthly);
 
   useEffect(() => {
@@ -147,7 +152,7 @@ export function PricingView() {
           </div>
           <div className="mt-2 text-[14px] opacity-75">
             {interval === "year" ? t("{price} billed once a year.", { price: `${PRICING.symbol}${PRICING.yearly}` }) : t("Billed monthly.")}{" "}
-            {t("Cancel anytime.")}
+            {trial ? t("First {days} days free.", { days: TRIAL_DAYS }) : t("Cancel anytime.")}
           </div>
           <ul className="relative mt-8 flex-1 space-y-3">
             {PRO_HIGHLIGHTS.slice(0, 8).map((f) => (
@@ -171,12 +176,16 @@ export function PricingView() {
                 ? t("Unlock Pro (demo mode)")
                 : signedOut
                   ? t("Start free, then upgrade")
-                  : t("Upgrade to Pro")}
+                  : trial
+                    ? t("Try Pro free for {days} days", { days: TRIAL_DAYS })
+                    : t("Upgrade to Pro")}
             {plan !== "pro" && <ArrowRight size={18} weight="bold" />}
           </button>
           <p className="relative mt-3 text-center text-[12.5px] opacity-60">
             {config.billingEnabled
-              ? t("Secure checkout with Stripe. 14-day refund on your first payment.")
+              ? trial
+                ? t("Nothing is charged for {days} days. Cancel before then and you pay nothing.", { days: TRIAL_DAYS })
+                : t("Secure checkout with Stripe. 14-day refund on your first payment.")
               : t("Payments aren't connected on this deployment, so Pro unlocks locally for testing.")}
           </p>
         </div>

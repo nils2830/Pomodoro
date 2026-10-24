@@ -26,6 +26,9 @@ export const LIMITS = {
   pro: { activities: Number.POSITIVE_INFINITY, insightsDays: Number.POSITIVE_INFINITY },
 } as const;
 
+/** Free days before the first charge, for people who have never subscribed. */
+export const TRIAL_DAYS = 7;
+
 export const PRICING = {
   currency: "USD",
   symbol: "$",

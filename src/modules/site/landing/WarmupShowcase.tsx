@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "motion/react";
 import { Reveal } from "../motion";
+import { useT } from "@/core/i18n";
 import { WARMUP_REFERENCES } from "@/modules/focus/warmup/protocol";
 
 /** The demo's script: the real phases, sped up about ten times. Ticks are 250 ms. */
@@ -17,6 +18,7 @@ const LENGTH = SCRIPT[SCRIPT.length - 1].until;
 
 /** A looping, sped-up preview of the warm-up screen. */
 function WarmupDemo() {
+  const tr = useT();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-20% 0px" });
   const [t, setT] = useState(0);
@@ -50,34 +52,37 @@ function WarmupDemo() {
             transition={{ duration: 0.7 }}
             className="mx-auto max-w-[24ch] text-[17px] leading-snug font-light text-white/75"
           >
-            {step.text}
+            {tr(step.text)}
           </motion.p>
         </AnimatePresence>
       </div>
       <div className="absolute inset-x-0 bottom-0 h-px bg-white/[0.06]">
         <div className="h-full bg-white/25 transition-[width] duration-300 ease-linear" style={{ width: `${progress * 100}%` }} />
       </div>
-      <div className="eyebrow absolute top-7 left-8 text-white/35">Warm-up · 90 s</div>
+      <div className="eyebrow absolute top-7 left-8 text-white/35">{tr("Warm-up")} · 90 s</div>
     </div>
   );
 }
 
 export function WarmupShowcase() {
+  const t = useT();
   return (
     <section id="warmup" className="mx-auto grid max-w-[1240px] scroll-mt-24 items-center gap-12 px-6 py-[12vh] lg:grid-cols-[1fr_0.9fr]">
       <div>
         <Reveal>
-          <div className="eyebrow text-accent">Warm-up</div>
-          <h2 className="display mt-5 text-[clamp(2.6rem,6vw,5rem)] leading-[0.9]">Ninety seconds on a single point.</h2>
+          <div className="eyebrow text-accent">{t("Warm-up")}</div>
+          <h2 className="display mt-5 text-[clamp(2.6rem,6vw,5rem)] leading-[0.9]">{t("Ninety seconds on a single point.")}</h2>
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-7 max-w-[48ch] text-[17px] leading-relaxed text-ink-2">
-            When you sit down, Steen asks for the first small thing you&apos;ll do. Then the screen settles to a single dot. Rest your eyes on it, blink whenever you
-            like, and come back when your gaze drifts. Close your eyes while the afterglow fades, and a soft tone starts your session.
+            {t(
+              "When you sit down, Steen asks for the first small thing you'll do. Then the screen settles to a single dot. Rest your eyes on it, blink whenever you like, and come back when your gaze drifts. Close your eyes while the afterglow fades, and a soft tone starts your session.",
+            )}
           </p>
           <p className="mt-4 max-w-[48ch] text-[17px] leading-relaxed text-ink-2">
-            It&apos;s inspired by trataka, a steady-gaze practice that small studies link to better attention and memory scores afterwards. No study has tested a short
-            dot before work, so we keep it optional and honest: a calm way to start, not a promise. Choose 30 seconds to 3 minutes.
+            {t(
+              "It's inspired by trataka, a steady-gaze practice that small studies link to better attention and memory scores afterwards. No study has tested a short dot before work, so we keep it optional and honest: a calm way to start, not a promise. Choose 30 seconds to 3 minutes.",
+            )}
           </p>
         </Reveal>
         <Reveal delay={0.2}>

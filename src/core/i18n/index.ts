@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { createContext, createElement, useContext, useEffect, type ReactNode } from "react";
 import { usePrefs } from "../prefs";
 import { useHydrated } from "../lib/useHydrated";
 import { DA } from "./da";
@@ -42,10 +42,19 @@ export function localeTag(locale: Locale = currentLocale()): string {
   return locale === "da" ? "da-DK" : "en-GB";
 }
 
-/** The language for rendering. English until hydrated, so server and client HTML match. */
+const ForcedLocale = createContext<Locale | null>(null);
+
+/** Pins a subtree to one language, on the server too (the Danish landing page). */
+export function LocaleProvider({ locale, children }: { locale: Locale | null; children: ReactNode }) {
+  return createElement(ForcedLocale.Provider, { value: locale }, children);
+}
+
+/** The language for rendering. English until hydrated, so server and client HTML match, unless a LocaleProvider pins it. */
 export function useLocale(): Locale {
+  const forced = useContext(ForcedLocale);
   const pref = usePrefs((s) => s.doc.language);
   const hydrated = useHydrated();
+  if (forced) return forced;
   return hydrated ? resolveLocale(pref) : "en";
 }
 

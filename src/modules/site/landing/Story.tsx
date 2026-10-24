@@ -2,6 +2,7 @@
 
 import { motion, useTransform, type MotionValue } from "motion/react";
 import { CAIRN_PATHS } from "@/core/ui/Logo";
+import { useT } from "@/core/i18n";
 import { Reveal, useSectionProgress } from "../motion";
 
 function Word({ children, progress, range }: { children: string; progress: MotionValue<number>; range: [number, number] }) {
@@ -15,9 +16,11 @@ function Word({ children, progress, range }: { children: string; progress: Motio
 
 /** A paragraph that lights up word by word as you scroll through it. */
 export function ScrollStatement() {
+  const t = useT();
   const [ref, progress] = useSectionProgress<HTMLDivElement>(["start end", "center center"]);
-  const text =
-    "Steen is a focus timer for people who would rather not watch the clock. Warm up for a minute or two, sit down, and let the numbers wait until you are done.";
+  const text = t(
+    "Steen is a focus timer for people who would rather not watch the clock. Warm up for a minute or two, sit down, and let the numbers wait until you are done.",
+  );
   const words = text.split(" ");
   return (
     <section className="mx-auto max-w-[1240px] px-6 py-[18vh]">
@@ -147,17 +150,18 @@ function Node({ at, progress }: { at: number; progress: MotionValue<number> }) {
 }
 
 export function Steps() {
+  const t = useT();
   const [ref, progress] = useSectionProgress<HTMLDivElement>(["start end", "center center"]);
   const line = useTransform(progress, [0.25, 0.95], ["0%", "100%"]);
   return (
     <section className="mx-auto max-w-[1240px] px-6 pb-[14vh]">
       <Reveal className="mb-12 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <div className="eyebrow text-accent">The method</div>
-          <h2 className="display mt-4 max-w-[16ch] text-[clamp(2.2rem,5vw,4rem)] leading-[0.92]">Three stones, every sit-down.</h2>
+          <div className="eyebrow text-accent">{t("The method")}</div>
+          <h2 className="display mt-4 max-w-[16ch] text-[clamp(2.2rem,5vw,4rem)] leading-[0.92]">{t("Three stones, every sit-down.")}</h2>
         </div>
         <p className="max-w-[38ch] text-[16px] leading-relaxed text-ink-2">
-          Every sit-down follows the same three steps. Do it often enough and it becomes the way you start.
+          {t("Every sit-down follows the same three steps. Do it often enough and it becomes the way you start.")}
         </p>
       </Reveal>
       <div ref={ref} className="relative">
@@ -185,9 +189,9 @@ export function Steps() {
                   </div>
                 </div>
                 <div className="px-5 pt-6 pb-5">
-                  <h3 className="display text-[30px] leading-none">{s.title}</h3>
-                  <p className="mt-3 text-[15.5px] leading-relaxed text-ink-2">{s.body}</p>
-                  <div className="mt-5 inline-flex rounded-full bg-fill px-3 py-1.5 text-[12.5px] text-ink-3">{s.meta}</div>
+                  <h3 className="display text-[30px] leading-none">{t(s.title)}</h3>
+                  <p className="mt-3 text-[15.5px] leading-relaxed text-ink-2">{t(s.body)}</p>
+                  <div className="mt-5 inline-flex rounded-full bg-fill px-3 py-1.5 text-[12.5px] text-ink-3">{t(s.meta)}</div>
                 </div>
               </Reveal>
             );

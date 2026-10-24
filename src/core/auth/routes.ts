@@ -1,5 +1,5 @@
 /** Paths anyone can open. Everything else needs a signed-in account. */
-const PUBLIC_PREFIXES = ["/welcome", "/login", "/auth", "/pricing", "/terms", "/privacy", "/api", "/manifest.webmanifest", "/images"];
+const PUBLIC_PREFIXES = ["/welcome", "/da", "/login", "/auth", "/pricing", "/terms", "/privacy", "/api", "/manifest.webmanifest", "/images"];
 
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -7,7 +7,7 @@ export function isPublicPath(pathname: string): boolean {
 
 /** Pages a signed-in person has no reason to see; send them into the app. */
 export function isAuthPage(pathname: string): boolean {
-  return pathname === "/welcome" || pathname === "/login";
+  return pathname === "/welcome" || pathname === "/da" || pathname === "/login";
 }
 
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;

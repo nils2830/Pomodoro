@@ -12,6 +12,7 @@ import { Sun } from "@/modules/focus/components/faces/Sun";
 import { Tide } from "@/modules/focus/components/faces/Tide";
 import { Words } from "@/modules/focus/components/faces/Words";
 import type { FaceProps } from "@/modules/focus/components/faces/types";
+import { useT } from "@/core/i18n";
 import { Parallax, Reveal } from "../motion";
 
 const FACES = [
@@ -45,6 +46,7 @@ function demo(progress: number, now: number): FaceProps {
 }
 
 export function FacesShowcase() {
+  const t = useT();
   const bg = getBackground("fjord")!;
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-10% 0px" });
@@ -70,10 +72,10 @@ export function FacesShowcase() {
       <div className="absolute inset-0 bg-gradient-to-b from-page via-black/35 to-page" />
       <div className="relative mx-auto max-w-[1240px] px-6">
         <Reveal>
-          <div className="eyebrow text-accent">Faces</div>
-          <h2 className="display mt-5 max-w-[14ch] text-[clamp(2.6rem,6vw,5rem)] leading-[0.9]">Time without the ticking.</h2>
+          <div className="eyebrow text-accent">{t("Faces")}</div>
+          <h2 className="display mt-5 max-w-[14ch] text-[clamp(2.6rem,6vw,5rem)] leading-[0.9]">{t("Time without the ticking.")}</h2>
           <p className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-ink-2">
-            A countdown in the corner of your eye can become the thing you watch. Hide it with one key, or pick a face that shows time passing without counting seconds.
+            {t("A countdown in the corner of your eye can become the thing you watch. Hide it with one key, or pick a face that shows time passing without counting seconds.")}
           </p>
         </Reveal>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" style={vars}>
@@ -87,8 +89,8 @@ export function FacesShowcase() {
                     {now !== null && <C {...demo(p, now)} />}
                   </div>
                   <div className="mt-4 flex items-baseline justify-between gap-3 border-t border-white/10 pt-4">
-                    <span className="text-[15px] font-medium">{f.name}</span>
-                    <span className="text-right text-[13px] text-white/60">{f.note}</span>
+                    <span className="text-[15px] font-medium">{t(f.name)}</span>
+                    <span className="text-right text-[13px] text-white/60">{t(f.note)}</span>
                   </div>
                 </div>
               </Reveal>

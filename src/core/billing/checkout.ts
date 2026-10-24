@@ -32,8 +32,8 @@ export async function startUpgrade(interval: Interval, router: { push: (href: st
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ interval }),
   });
-  const body = (await res.json().catch(() => ({}))) as { clientSecret?: string; error?: string };
-  if (body.clientSecret) useCheckout.getState().open(body.clientSecret);
+  const body = (await res.json().catch(() => ({}))) as { clientSecret?: string; trial?: boolean; error?: string };
+  if (body.clientSecret) useCheckout.getState().open(body.clientSecret, body.trial);
   else toast({ message: body.error ?? t("Couldn't start checkout."), tone: "error" });
 }
 

@@ -8,7 +8,8 @@ import { Dialog } from "../ui/Dialog";
 import { Button } from "../ui/Button";
 import { Segmented } from "../ui/Segmented";
 import { useUI } from "../ui/store";
-import { FEATURES, PRICING, PRO_HIGHLIGHTS } from "./plans";
+import { FEATURES, PRICING, PRO_HIGHLIGHTS, TRIAL_DAYS } from "./plans";
+import { useTrialEligible } from "./entitlements";
 import { startUpgrade, type Interval } from "./checkout";
 import { config } from "../config";
 import { useT } from "../i18n";
@@ -20,6 +21,7 @@ export function UpgradeDialog() {
   const router = useRouter();
   const [interval, setInterval] = useState<Interval>("year");
   const [busy, setBusy] = useState(false);
+  const trial = useTrialEligible();
   const focus = feature ? FEATURES[feature] : null;
   const list = PRO_HIGHLIGHTS.filter((f) => f !== feature).slice(0, 6);
   const monthlyEquivalent = (PRICING.yearly / 12).toFixed(2).replace(/\.00$/, "");
@@ -80,8 +82,13 @@ export function UpgradeDialog() {
               close(); // the embedded checkout opens in its own dialog
             }}
           >
-            {config.billingEnabled ? t("Upgrade to Pro") : t("Unlock Pro (demo)")}
+            {!config.billingEnabled ? t("Unlock Pro (demo)") : trial ? t("Try Pro free for {days} days", { days: TRIAL_DAYS }) : t("Upgrade to Pro")}
           </Button>
+          {trial && (
+            <p className="mt-2.5 text-center text-[12.5px] leading-snug text-ink-3">
+              {t("Nothing is charged for {days} days. Cancel before then and you pay nothing.", { days: TRIAL_DAYS })}
+            </p>
+          )}
           <Link href="/pricing" onClick={close} className="mt-3 block text-center text-[13px] text-ink-3 underline-offset-4 hover:text-ink hover:underline">
             {t("Compare plans")}
           </Link>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, motion, useInView } from "motion/react";
 import { createRandom } from "@/core/lib/random";
+import { useT } from "@/core/i18n";
 import { Reveal } from "../motion";
 
 function CountUp({ to, decimals = 0, suffix = "" }: { to: number; decimals?: number; suffix?: string }) {
@@ -35,14 +36,16 @@ const CELLS = Array.from({ length: WEEKS * 7 }, (_, i) => {
 const level = (v: number) => (v === 0 ? "rgb(243 238 230 / 0.06)" : `color-mix(in oklab, var(--seq) ${[0, 30, 55, 78, 100][v]}%, #0c0b0a)`);
 
 export function InsightsShowcase() {
+  const t = useT();
   return (
     <section id="insights" className="mx-auto max-w-[1240px] scroll-mt-24 px-6 py-[14vh]">
       <Reveal>
-        <div className="eyebrow text-accent">Insights</div>
-        <h2 className="display mt-5 max-w-[16ch] text-[clamp(2.6rem,6vw,5rem)] leading-[0.9]">See how often you actually sit down.</h2>
+        <div className="eyebrow text-accent">{t("Insights")}</div>
+        <h2 className="display mt-5 max-w-[16ch] text-[clamp(2.6rem,6vw,5rem)] leading-[0.9]">{t("See how often you actually sit down.")}</h2>
         <p className="mt-6 max-w-[50ch] text-[17px] leading-relaxed text-ink-2">
-          Back-to-back sessions become one sit-down, so the numbers match how your day felt. Then Steen shows your rhythm: when you start, how long you stay, which days
-          slip, and what you spend the time on.
+          {t(
+            "Back-to-back sessions become one sit-down, so the numbers match how your day felt. Then Steen shows your rhythm: when you start, how long you stay, which days slip, and what you spend the time on.",
+          )}
         </p>
       </Reveal>
 
@@ -51,20 +54,20 @@ export function InsightsShowcase() {
           {[
             { v: 2.4, d: 1, s: "", label: "sit-downs on a working day" },
             { v: 52, d: 0, s: "m", label: "average sit-down" },
-            { v: 13, d: 0, s: " days", label: "longest streak" },
+            { v: 13, d: 0, s: ` ${t("days")}`, label: "longest streak" },
           ].map((k, i) => (
             <Reveal key={k.label} delay={i * 0.1} className="rounded-[28px] bg-surface p-7 ring-1 ring-line">
               <div className="text-[clamp(2.4rem,4vw,3.4rem)] leading-none font-semibold tracking-[-0.04em]">
                 <CountUp to={k.v} decimals={k.d} suffix={k.s} />
               </div>
-              <div className="mt-3 text-[14px] text-ink-3">{k.label}</div>
+              <div className="mt-3 text-[14px] text-ink-3">{t(k.label)}</div>
             </Reveal>
           ))}
         </div>
         <Reveal delay={0.15} className="rounded-[28px] bg-surface p-7 ring-1 ring-line">
           <div className="flex items-baseline justify-between">
-            <div className="text-[15px] font-medium">Six months at a glance</div>
-            <div className="text-[13px] text-ink-3">sample data</div>
+            <div className="text-[15px] font-medium">{t("Six months at a glance")}</div>
+            <div className="text-[13px] text-ink-3">{t("sample data")}</div>
           </div>
           <div className="mt-6 grid grid-flow-col grid-rows-7 gap-[5px]" style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))` }}>
             {CELLS.map((v, i) => (
@@ -83,10 +86,10 @@ export function InsightsShowcase() {
             {[
               ["Tuesdays are your strongest day", "2h 10m on average, against 1h 05m on other days."],
               ["You usually start around 08:45", "Give or take 20 minutes. That's a steady routine."],
-            ].map(([t, b]) => (
-              <div key={t}>
-                <div className="display text-[18px] leading-snug">{t}</div>
-                <p className="mt-1 text-[14px] text-ink-3">{b}</p>
+            ].map(([title, body]) => (
+              <div key={title}>
+                <div className="display text-[18px] leading-snug">{t(title)}</div>
+                <p className="mt-1 text-[14px] text-ink-3">{t(body)}</p>
               </div>
             ))}
           </div>
